@@ -1,9 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+<section class="market-strip">
+  <div class="market-pill" data-ticker="BTCUSDT"><span>BTC</span><b>--</b></div>
+  <div class="market-pill" data-ticker="ETHUSDT"><span>ETH</span><b>--</b></div>
+  <div class="market-pill" data-ticker="SOLUSDT"><span>SOL</span><b>--</b></div>
+  <div class="market-pill" data-ticker="BNBUSDT"><span>BNB</span><b>--</b></div>
+</section>
+
 <section class="stats-grid">
-  <div class="stat"><span>Total</span><strong>{{ stats.total or 0 }}</strong></div>
-  <div class="stat"><span>Long</span><strong class="up">{{ stats.longs or 0 }}</strong></div>
-  <div class="stat"><span>Short</span><strong class="down">{{ stats.shorts or 0 }}</strong></div>
+  <div class="stat"><span>Total</span><strong>{{ stats.total or 0 }}</strong><small>sinais recebidos</small></div>
+  <div class="stat"><span>Long</span><strong class="up">{{ stats.longs or 0 }}</strong><small>compras</small></div>
+  <div class="stat"><span>Short</span><strong class="down">{{ stats.shorts or 0 }}</strong><small>vendas</small></div>
 </section>
 
 <section class="panel">
@@ -25,18 +32,35 @@
     </form>
   </div>
 
-  <div class="signal-list">
+  <div class="signal-list" id="signalsList">
     {% for s in signals %}
-    <article class="signal-card {{ s.direction }}">
-      <div class="signal-main">
-        <strong>{{ s.asset }}</strong>
-        <span>{{ s.tf }}</span>
-        <b>{{ s.direction|upper }}</b>
+    <article
+      class="signal-card {{ s.direction }}"
+      data-symbol="{{ s.asset }}"
+      data-direction="{{ s.direction }}"
+      data-entry="{{ s.entry_price }}"
+      data-tp="{{ s.tp_price }}"
+      data-sl="{{ s.sl_price }}"
+    >
+      <div class="signal-top">
+        <div class="signal-identity">
+          <strong>{{ s.asset.replace('USDT', '') }}</strong>
+          <span>{{ s.tf }}</span>
+          <b>{{ s.direction|upper }}</b>
+        </div>
+        <div class="live-box">
+          <span>Ao vivo</span>
+          <strong class="live-pnl">--</strong>
+          <small class="live-price">preco --</small>
+        </div>
       </div>
-      <div class="prices">
-        <span>Entrada <b>${{ "%.4f"|format(s.entry_price) }}</b></span>
-        <span>TP <b>${{ "%.4f"|format(s.tp_price) }} / {{ "%.2f"|format(s.tp_pct) }}%</b></span>
-        <span>SL <b>${{ "%.4f"|format(s.sl_price) }} / {{ "%.2f"|format(s.sl_pct) }}%</b></span>
+      <div class="price-grid">
+        <div><span>Entrada</span><b>${{ "%.4f"|format(s.entry_price) }}</b></div>
+        <div><span>TP</span><b>${{ "%.4f"|format(s.tp_price) }}</b><small>{{ "%.2f"|format(s.tp_pct) }}%</small></div>
+        <div><span>SL</span><b>${{ "%.4f"|format(s.sl_price) }}</b><small>{{ "%.2f"|format(s.sl_pct) }}%</small></div>
+      </div>
+      <div class="range-line">
+        <span class="range-fill"></span>
       </div>
       <div class="meta">
         <span>Criado: {{ s.created_at }}</span>
