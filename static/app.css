@@ -590,7 +590,8 @@ input:focus, select:focus {
     radial-gradient(circle at 18% 0%, rgba(0, 245, 160, .08), transparent 20rem),
     linear-gradient(180deg, rgba(9, 20, 33, .96), rgba(5, 8, 13, .98));
   border-radius: 8px;
-  padding: 14px 20px 16px;
+  padding: 5px 5px 12px;
+  font-size: 15px;
 }
 
 .signal-card.short {
@@ -636,7 +637,7 @@ input:focus, select:focus {
 
 .signal-identity strong {
   font-family: var(--mono);
-  font-size: 23px;
+  font-size: 15px;
   line-height: 1;
 }
 
@@ -656,7 +657,7 @@ input:focus, select:focus {
   border-radius: 6px;
   padding: 7px 11px;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .signal-card.short .signal-identity b {
@@ -670,7 +671,7 @@ input:focus, select:focus {
   border-radius: 6px;
   padding: 5px 9px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 15px;
   font-style: normal;
 }
 
@@ -681,7 +682,7 @@ input:focus, select:focus {
   gap: 14px;
   padding-left: 14px;
   border-left: 1px solid rgba(140, 152, 167, .18);
-  font-size: 12px;
+  font-size: 15px;
   white-space: nowrap;
 }
 
@@ -704,19 +705,20 @@ input:focus, select:focus {
 .meta {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .live-box strong {
   display: block;
   margin: 2px 0;
   font-family: var(--mono);
-  font-size: 22px;
+  font-size: 15px;
 }
 
 .live-box small {
   color: var(--dim);
   font-family: var(--mono);
+  font-size: 15px;
 }
 
 .target-row {
@@ -747,18 +749,18 @@ input:focus, select:focus {
 .target-row span {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .target-row b {
   color: var(--text);
-  font-size: 22px;
+  font-size: 15px;
   line-height: 1.1;
 }
 
 .target-row small {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .target-row div:first-child small {
@@ -1236,7 +1238,7 @@ input:focus, select:focus {
     gap: 9px;
   }
   .signal-identity strong {
-    font-size: 19px;
+    font-size: 15px;
   }
   .target-row {
     margin: 16px 0 12px;
