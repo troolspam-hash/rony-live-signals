@@ -105,7 +105,7 @@
 
       document.querySelectorAll('[data-ticker]').forEach(function(el) {
         var price = prices[el.dataset.ticker];
-        var value = el.querySelector('b');
+        var value = el.querySelector('.market-price b');
         if (value && Number.isFinite(price)) value.textContent = fmtPrice(price);
       });
 

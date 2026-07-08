@@ -92,6 +92,8 @@ a, button {
   border-radius: 7px;
   padding: 11px 15px;
   cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: .02em;
 }
 
 .nav a.active {
@@ -281,35 +283,39 @@ input:focus, select:focus {
   text-transform: uppercase;
 }
 
-.market-pill b {
-  display: block;
+.market-price {
   position: relative;
   z-index: 1;
-  margin-top: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 17px;
+  max-width: 52%;
+  white-space: nowrap;
+}
+
+.market-price b {
+  display: block;
   color: var(--green);
   font-family: var(--mono);
   font-size: 30px;
   line-height: 1;
-  max-width: 50%;
-  white-space: nowrap;
 }
 
-.market-pill small {
-  position: relative;
-  z-index: 1;
+.market-price small {
   display: block;
-  margin-top: 6px;
   color: var(--muted);
   font-family: var(--mono);
   font-size: 12px;
+  line-height: 1;
 }
 
 .sparkline {
   position: absolute;
   right: 18px;
-  bottom: 15px;
-  width: 42%;
-  height: 70px;
+  bottom: 19px;
+  width: 40%;
+  height: 62px;
   opacity: .9;
 }
 
@@ -361,7 +367,9 @@ input:focus, select:focus {
   padding: 18px 30px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 22px;
+  text-align: left;
   border: 0;
   border-right: 1px solid var(--line);
   border-radius: 0;
@@ -372,6 +380,10 @@ input:focus, select:focus {
 
 .stat:last-child {
   border-right: 0;
+}
+
+.stat > div {
+  min-width: 150px;
 }
 
 .stat strong {
@@ -1118,14 +1130,17 @@ input:focus, select:focus {
     min-height: 124px;
     padding: 15px 16px;
   }
-  .market-pill b {
+  .market-price {
+    max-width: 47%;
+  }
+  .market-price b {
     font-size: 27px;
-    max-width: 48%;
   }
   .sparkline {
     right: 14px;
-    width: 38%;
-    height: 62px;
+    bottom: 21px;
+    width: 37%;
+    height: 58px;
   }
   .summary-cell {
     grid-template-columns: 70px minmax(112px, 1fr) minmax(90px, 28%);
@@ -1144,7 +1159,7 @@ input:focus, select:focus {
   .market-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .market-pill b {
+  .market-price {
     max-width: 55%;
   }
   .sparkline {
