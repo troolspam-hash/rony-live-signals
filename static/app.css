@@ -590,7 +590,7 @@ input:focus, select:focus {
     radial-gradient(circle at 18% 0%, rgba(0, 245, 160, .08), transparent 20rem),
     linear-gradient(180deg, rgba(9, 20, 33, .96), rgba(5, 8, 13, .98));
   border-radius: 8px;
-  padding: 18px 22px 22px;
+  padding: 14px 20px 16px;
 }
 
 .signal-card.short {
@@ -636,7 +636,7 @@ input:focus, select:focus {
 
 .signal-identity strong {
   font-family: var(--mono);
-  font-size: 26px;
+  font-size: 23px;
   line-height: 1;
 }
 
@@ -681,7 +681,7 @@ input:focus, select:focus {
   gap: 14px;
   padding-left: 14px;
   border-left: 1px solid rgba(140, 152, 167, .18);
-  font-size: 14px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -695,7 +695,7 @@ input:focus, select:focus {
 }
 
 .live-box {
-  min-width: 170px;
+  min-width: 150px;
   text-align: right;
 }
 
@@ -711,7 +711,7 @@ input:focus, select:focus {
   display: block;
   margin: 2px 0;
   font-family: var(--mono);
-  font-size: 26px;
+  font-size: 22px;
 }
 
 .live-box small {
@@ -724,14 +724,14 @@ input:focus, select:focus {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  margin: 28px 48px 16px;
+  margin: 22px 48px 14px;
 }
 
 .target-row div {
   display: flex;
   align-items: baseline;
-  gap: 14px;
-  min-height: 42px;
+  gap: 12px;
+  min-height: 34px;
 }
 
 .target-row div:last-child {
@@ -747,18 +747,18 @@ input:focus, select:focus {
 .target-row span {
   display: block;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .target-row b {
   color: var(--text);
-  font-size: 25px;
+  font-size: 22px;
   line-height: 1.1;
 }
 
 .target-row small {
   color: var(--muted);
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .target-row div:first-child small {
@@ -838,32 +838,6 @@ input:focus, select:focus {
 .range-thumb.negative {
   border-color: var(--red);
   box-shadow: 0 0 0 4px rgba(255, 77, 115, .14);
-}
-
-.range-labels {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  margin-top: 9px;
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 12px;
-}
-
-.range-labels span:nth-child(2) {
-  text-align: center;
-  color: var(--text);
-}
-
-.range-labels span:last-child {
-  text-align: right;
-}
-
-.tp-label {
-  color: var(--green) !important;
-}
-
-.sl-label {
-  color: var(--red) !important;
 }
 
 .meta {
@@ -1272,9 +1246,6 @@ input:focus, select:focus {
     justify-content: flex-start;
     gap: 8px;
     flex-wrap: wrap;
-  }
-  .range-labels {
-    font-size: 10px;
   }
   .history-footer {
     grid-template-columns: 1fr;

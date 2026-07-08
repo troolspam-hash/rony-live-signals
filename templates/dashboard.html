@@ -177,17 +177,6 @@
         <span class="range-center"></span>
         <span class="range-thumb"></span>
       </div>
-      <div class="range-labels">
-        {% if s.direction == 'short' %}
-          <span class="tp-label">TP ${{ s.tp_price|price_fmt }}</span>
-          <span>Entrada ${{ s.entry_price|price_fmt }}</span>
-          <span class="sl-label">SL ${{ s.sl_price|price_fmt }}</span>
-        {% else %}
-          <span class="sl-label">SL ${{ s.sl_price|price_fmt }}</span>
-          <span>Entrada ${{ s.entry_price|price_fmt }}</span>
-          <span class="tp-label">TP ${{ s.tp_price|price_fmt }}</span>
-        {% endif %}
-      </div>
     </article>
     {% else %}
     <div class="empty">Nenhum sinal aberto no momento.</div>
