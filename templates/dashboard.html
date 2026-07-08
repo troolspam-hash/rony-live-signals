@@ -7,27 +7,18 @@
   <div class="market-pill" data-ticker="BNBUSDT"><span>BNB</span><b>--</b></div>
 </section>
 
-<section class="stats-grid">
-  <div class="stat">
-    <span>Trades</span>
-    <strong>{{ trade_stats.total }}</strong>
-    <small>fechados no historico</small>
-  </div>
-  <div class="stat">
-    <span>Win Rate</span>
-    <strong>{% if trade_stats.wr is not none %}{{ "%.1f"|format(trade_stats.wr) }}%{% else %}--{% endif %}</strong>
-    <small>{{ trade_stats.wins }}/{{ trade_stats.losses }} green / loss</small>
-  </div>
-  <div class="stat">
-    <span>PnL %</span>
-    <strong class="{% if trade_stats.pnl_pct >= 0 %}up{% else %}down{% endif %}">
-      {{ "%+.2f"|format(trade_stats.pnl_pct) }}%
-    </strong>
-    <small>soma dos trades finalizados</small>
-  </div>
-</section>
-
 <section class="summary-panel">
+  <div class="summary-row asset-summary">
+    {% for item in trade_stats.by_asset %}
+      <div class="summary-cell">
+        <span>{{ item.asset }}</span>
+        <div>
+          <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
+          <small>{{ item.count }} trades</small>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
   <div class="summary-row direction-summary">
     <div class="summary-cell">
       <span>LONG</span>
@@ -48,16 +39,25 @@
       </div>
     </div>
   </div>
-  <div class="summary-row asset-summary">
-    {% for item in trade_stats.by_asset %}
-      <div class="summary-cell">
-        <span>{{ item.asset }}</span>
-        <div>
-          <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
-          <small>{{ item.count }} trades</small>
-        </div>
-      </div>
-    {% endfor %}
+</section>
+
+<section class="stats-grid">
+  <div class="stat">
+    <span>Trades</span>
+    <strong>{{ trade_stats.total }}</strong>
+    <small>fechados no historico</small>
+  </div>
+  <div class="stat">
+    <span>Win Rate</span>
+    <strong>{% if trade_stats.wr is not none %}{{ "%.1f"|format(trade_stats.wr) }}%{% else %}--{% endif %}</strong>
+    <small>{{ trade_stats.wins }}/{{ trade_stats.losses }} green / loss</small>
+  </div>
+  <div class="stat">
+    <span>PnL %</span>
+    <strong class="{% if trade_stats.pnl_pct >= 0 %}up{% else %}down{% endif %}">
+      {{ "%+.2f"|format(trade_stats.pnl_pct) }}%
+    </strong>
+    <small>soma dos trades finalizados</small>
   </div>
 </section>
 

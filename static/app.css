@@ -208,7 +208,8 @@ input:focus, select:focus {
 }
 
 .stat {
-  padding: 17px 20px;
+  min-height: 96px;
+  padding: 16px 20px;
   border: 0;
   border-right: 1px solid var(--line);
   border-radius: 0;
@@ -248,7 +249,7 @@ input:focus, select:focus {
 .summary-panel {
   display: grid;
   gap: 0;
-  margin: -4px 0 16px;
+  margin: -2px 0 12px;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: rgba(8, 10, 13, .94);
@@ -267,17 +268,20 @@ input:focus, select:focus {
 
 .asset-summary {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid var(--line);
 }
 
 .summary-cell {
   display: grid;
-  grid-template-columns: 86px 1fr;
+  grid-template-columns: 88px 1fr;
   align-items: center;
   gap: 12px;
-  min-height: 68px;
+  min-height: 64px;
   padding: 12px 18px;
   border-right: 1px solid var(--line);
+}
+
+.direction-summary {
+  border-top: 1px solid var(--line);
 }
 
 .summary-cell:last-child {
@@ -299,7 +303,7 @@ input:focus, select:focus {
 }
 
 .summary-cell b {
-  font-size: 19px;
+  font-size: 20px;
   letter-spacing: 0;
 }
 
