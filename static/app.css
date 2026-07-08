@@ -210,6 +210,9 @@ input:focus, select:focus {
 .stat {
   min-height: 96px;
   padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border: 0;
   border-right: 1px solid var(--line);
   border-radius: 0;
@@ -221,10 +224,11 @@ input:focus, select:focus {
 
 .stat strong {
   display: block;
-  margin-top: 8px;
+  margin-top: 7px;
   font-family: var(--mono);
-  font-size: 22px;
+  font-size: 21px;
   font-style: normal;
+  line-height: 1.1;
 }
 
 .stat strong em {
@@ -237,10 +241,11 @@ input:focus, select:focus {
 
 .stat small {
   display: block;
-  margin-top: 6px;
+  margin-top: 7px;
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .up { color: var(--green); }
@@ -272,10 +277,10 @@ input:focus, select:focus {
 
 .summary-cell {
   display: grid;
-  grid-template-columns: 88px 1fr;
+  grid-template-columns: 84px 1fr;
   align-items: center;
   gap: 12px;
-  min-height: 64px;
+  min-height: 62px;
   padding: 12px 18px;
   border-right: 1px solid var(--line);
 }
@@ -290,7 +295,7 @@ input:focus, select:focus {
 
 .summary-cell span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -298,18 +303,20 @@ input:focus, select:focus {
 .summary-cell div {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 9px;
   min-width: 0;
 }
 
 .summary-cell b {
-  font-size: 20px;
+  font-size: 19px;
   letter-spacing: 0;
+  line-height: 1;
 }
 
 .summary-cell small {
-  color: var(--muted);
+  color: var(--dim);
   font-size: 12px;
+  line-height: 1;
   white-space: nowrap;
 }
 
