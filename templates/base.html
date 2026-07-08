@@ -17,10 +17,10 @@
     </div>
     {% if me %}
     <nav class="nav">
-      <a href="{{ url_for('dashboard') }}">Sinais</a>
-      <a href="{{ url_for('history') }}">Historico</a>
+      <a class="{% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">Sinais</a>
+      <a class="{% if request.endpoint == 'history' %}active{% endif %}" href="{{ url_for('history') }}">Historico</a>
       {% if me.role == 'admin' %}
-      <a href="{{ url_for('admin_users') }}">Admin</a>
+      <a class="{% if request.endpoint == 'admin_users' %}active{% endif %}" href="{{ url_for('admin_users') }}">Admin</a>
       {% endif %}
       <form method="post" action="{{ url_for('logout') }}">
         <button type="submit">Sair</button>

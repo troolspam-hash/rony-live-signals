@@ -23,27 +23,28 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 20% -10%, rgba(0, 245, 160, .08), transparent 28rem),
-    linear-gradient(180deg, #050607 0%, var(--bg) 46%);
+    radial-gradient(circle at 20% -12%, rgba(0, 245, 160, .09), transparent 30rem),
+    radial-gradient(circle at 88% 2%, rgba(61, 118, 255, .09), transparent 30rem),
+    linear-gradient(180deg, #07101b 0%, #030609 42%, var(--bg) 100%);
   color: var(--text);
   font-family: var(--sans);
 }
 
 .topbar {
-  min-height: 78px;
+  min-height: 76px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
   border-bottom: 1px solid var(--line);
-  background: rgba(3, 4, 6, .92);
+  background: rgba(3, 7, 12, .88);
   backdrop-filter: blur(10px);
 }
 
 .brand {
   color: var(--green);
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: .08em;
 }
@@ -54,6 +55,17 @@ body {
   font-size: 11px;
   margin-top: 5px;
   text-transform: uppercase;
+}
+
+.subtitle::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px rgba(0, 245, 160, .9);
 }
 
 .nav {
@@ -74,12 +86,18 @@ a, button {
 .user-form button,
 .actions button,
 .primary {
-  border: 1px solid var(--line);
-  background: var(--panel2);
+  border: 1px solid var(--line2);
+  background: rgba(13, 17, 23, .82);
   color: var(--text);
   border-radius: 7px;
   padding: 11px 15px;
   cursor: pointer;
+}
+
+.nav a.active {
+  color: var(--text);
+  border-color: rgba(0, 245, 160, .9);
+  box-shadow: 0 0 0 1px rgba(0, 245, 160, .18), inset 0 0 24px rgba(0, 245, 160, .08);
 }
 
 .nav a:hover,
@@ -162,8 +180,8 @@ input:focus, select:focus {
 .market-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 14px;
+  margin-bottom: 10px;
 }
 
 .market-pill,
@@ -175,11 +193,72 @@ input:focus, select:focus {
 }
 
 .market-pill {
-  min-height: 64px;
-  padding: 12px 15px;
+  position: relative;
+  min-height: 112px;
+  padding: 14px 16px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(11, 23, 37, .94), rgba(5, 9, 15, .96));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .03);
 }
 
-.market-pill span,
+.market-main {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  position: relative;
+  z-index: 1;
+}
+
+.market-main strong {
+  display: block;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.market-main em {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 12px;
+}
+
+.market-main i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(0, 245, 160, .85);
+}
+
+.coin-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--text);
+  background: linear-gradient(135deg, rgba(0, 245, 160, .28), rgba(51, 95, 255, .22));
+  border: 1px solid rgba(255, 255, 255, .12);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.coin-badge.small {
+  width: 32px;
+  height: 32px;
+}
+
+.coin-btc .coin-badge { background: linear-gradient(135deg, #f59d21, #8f4c00); }
+.coin-eth .coin-badge { background: linear-gradient(135deg, #6f86ff, #2e3d90); }
+.coin-sol .coin-badge { background: linear-gradient(135deg, #00f5a0, #635bff); }
+.coin-bnb .coin-badge { background: linear-gradient(135deg, #f3c74f, #9b6a00); }
+
+.market-pill span:not(.coin-badge),
 .stat span {
   display: block;
   color: var(--muted);
@@ -190,10 +269,57 @@ input:focus, select:focus {
 
 .market-pill b {
   display: block;
-  margin-top: 8px;
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
   color: var(--green);
   font-family: var(--mono);
-  font-size: 18px;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.market-pill small {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.sparkline {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  width: 42%;
+  height: 44px;
+  opacity: .9;
+}
+
+.sparkline path,
+.mini-spark path {
+  fill: none;
+  stroke: var(--green);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sparkline::after {
+  content: "";
+}
+
+.market-pill::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 46%;
+  height: 55%;
+  background: linear-gradient(180deg, rgba(0, 245, 160, .18), transparent);
+  clip-path: polygon(0 70%, 20% 62%, 40% 66%, 62% 38%, 78% 45%, 100% 10%, 100% 100%, 0 100%);
+  opacity: .55;
 }
 
 .stats-grid {
@@ -204,12 +330,13 @@ input:focus, select:focus {
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
-  background: rgba(8, 10, 13, .94);
+  background:
+    linear-gradient(180deg, rgba(10, 24, 38, .92), rgba(5, 10, 17, .96));
 }
 
 .stat {
-  min-height: 96px;
-  padding: 16px 20px;
+  min-height: 104px;
+  padding: 18px 28px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -226,7 +353,7 @@ input:focus, select:focus {
   display: block;
   margin-top: 7px;
   font-family: var(--mono);
-  font-size: 21px;
+  font-size: 24px;
   font-style: normal;
   line-height: 1.1;
 }
@@ -254,10 +381,11 @@ input:focus, select:focus {
 .summary-panel {
   display: grid;
   gap: 0;
-  margin: -2px 0 12px;
+  margin: 0 0 12px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: rgba(8, 10, 13, .94);
+  background:
+    linear-gradient(180deg, rgba(10, 24, 38, .88), rgba(5, 10, 17, .95));
   font-family: var(--mono);
   overflow: hidden;
 }
@@ -277,11 +405,11 @@ input:focus, select:focus {
 
 .summary-cell {
   display: grid;
-  grid-template-columns: 84px 1fr;
+  grid-template-columns: 80px minmax(120px, 1fr) 32%;
   align-items: center;
   gap: 12px;
-  min-height: 62px;
-  padding: 12px 18px;
+  min-height: 76px;
+  padding: 14px 18px;
   border-right: 1px solid var(--line);
 }
 
@@ -308,7 +436,7 @@ input:focus, select:focus {
 }
 
 .summary-cell b {
-  font-size: 19px;
+  font-size: 23px;
   letter-spacing: 0;
   line-height: 1;
 }
@@ -318,6 +446,24 @@ input:focus, select:focus {
   font-size: 12px;
   line-height: 1;
   white-space: nowrap;
+}
+
+.mini-spark {
+  width: 100%;
+  height: 34px;
+  opacity: .85;
+}
+
+.summary-cell.bad .mini-spark path {
+  stroke: var(--red);
+}
+
+.summary-cell.good {
+  background: linear-gradient(90deg, rgba(0, 245, 160, .035), transparent);
+}
+
+.summary-cell.bad {
+  background: linear-gradient(90deg, rgba(255, 77, 115, .04), transparent);
 }
 
 .panel {
@@ -354,9 +500,11 @@ input:focus, select:focus {
   overflow: hidden;
   border: 1px solid var(--line);
   border-left: 3px solid var(--green);
-  background: linear-gradient(180deg, rgba(10, 13, 17, .98), rgba(5, 6, 8, .98));
+  background:
+    radial-gradient(circle at 18% 0%, rgba(0, 245, 160, .08), transparent 20rem),
+    linear-gradient(180deg, rgba(9, 20, 33, .96), rgba(5, 8, 13, .98));
   border-radius: 8px;
-  padding: 14px 16px;
+  padding: 16px;
 }
 
 .signal-card.short {
@@ -379,6 +527,12 @@ input:focus, select:focus {
   background: linear-gradient(90deg, rgba(255, 77, 115, .07), transparent 42%);
 }
 
+.signal-card.short {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 77, 115, .08), transparent 20rem),
+    linear-gradient(180deg, rgba(13, 16, 25, .96), rgba(5, 8, 13, .98));
+}
+
 .signal-top,
 .signal-identity,
 .meta {
@@ -395,12 +549,17 @@ input:focus, select:focus {
 
 .signal-identity strong {
   font-family: var(--mono);
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .signal-identity span {
   color: var(--muted);
   font-family: var(--mono);
+}
+
+.signal-identity .coin-badge {
+  color: var(--text);
+  font-size: 9px;
 }
 
 .signal-identity b {
@@ -457,15 +616,15 @@ input:focus, select:focus {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin: 12px 0 10px;
+  margin: 14px 0 12px;
 }
 
 .price-grid div {
   border: 1px solid rgba(48, 59, 77, .8);
   border-radius: 7px;
-  min-height: 72px;
-  padding: 10px 11px;
-  background: rgba(3, 4, 6, .5);
+  min-height: 76px;
+  padding: 11px 12px;
+  background: rgba(3, 9, 17, .54);
 }
 
 .price-grid b,
@@ -477,6 +636,7 @@ input:focus, select:focus {
 
 .price-grid b {
   color: var(--text);
+  font-size: 16px;
 }
 
 .price-grid small {
@@ -485,7 +645,7 @@ input:focus, select:focus {
 
 .range-line {
   position: relative;
-  height: 8px;
+  height: 7px;
   overflow: visible;
   background: #171d26;
   border-radius: 999px;
@@ -556,10 +716,10 @@ input:focus, select:focus {
 .range-labels {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  margin-top: 8px;
+  margin-top: 9px;
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .range-labels span:nth-child(2) {
@@ -743,6 +903,9 @@ input:focus, select:focus {
     border-right: 0;
     border-top: 1px solid var(--line);
   }
+  .mini-spark {
+    display: none;
+  }
   .summary-row:first-child .summary-cell:first-child {
     border-top: 0;
   }
@@ -759,5 +922,14 @@ input:focus, select:focus {
   .live-box {
     min-width: 0;
     text-align: left;
+  }
+  .signal-identity {
+    gap: 9px;
+  }
+  .signal-identity strong {
+    font-size: 19px;
+  }
+  .range-labels {
+    font-size: 10px;
   }
 }

@@ -1,26 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="market-strip">
-  <div class="market-pill" data-ticker="BTCUSDT"><span>BTC</span><b>--</b></div>
-  <div class="market-pill" data-ticker="ETHUSDT"><span>ETH</span><b>--</b></div>
-  <div class="market-pill" data-ticker="SOLUSDT"><span>SOL</span><b>--</b></div>
-  <div class="market-pill" data-ticker="BNBUSDT"><span>BNB</span><b>--</b></div>
+  {% for coin in [('BTCUSDT','BTC'), ('ETHUSDT','ETH'), ('SOLUSDT','SOL'), ('BNBUSDT','BNB')] %}
+  <div class="market-pill coin-{{ coin[1]|lower }}" data-ticker="{{ coin[0] }}">
+    <div class="market-main">
+      <span class="coin-badge">{{ coin[1] }}</span>
+      <div>
+        <strong>{{ coin[1] }}</strong>
+        <em><i></i>Live</em>
+      </div>
+    </div>
+    <b>--</b>
+    <small>USD</small>
+    <svg class="sparkline" viewBox="0 0 120 42" aria-hidden="true">
+      <path d="M0 33 L11 29 L21 31 L31 25 L43 19 L55 22 L67 14 L79 17 L91 10 L103 12 L120 5"></path>
+    </svg>
+  </div>
+  {% endfor %}
 </section>
 
 <section class="summary-panel">
   <div class="summary-row asset-summary">
     {% for item in trade_stats.by_asset %}
-      <div class="summary-cell">
+      <div class="summary-cell {% if item.pnl_pct >= 0 %}good{% else %}bad{% endif %}">
         <span>{{ item.asset }}</span>
         <div>
           <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
           <small>{{ item.count }} trades</small>
         </div>
+        <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
+          <path d="M0 26 L14 23 L28 25 L42 20 L56 17 L70 19 L84 13 L98 15 L120 8"></path>
+        </svg>
       </div>
     {% endfor %}
   </div>
   <div class="summary-row direction-summary">
-    <div class="summary-cell">
+    <div class="summary-cell direction-card {% if trade_stats.by_direction['long'].pnl_pct >= 0 %}good{% else %}bad{% endif %}">
       <span>LONG</span>
       <div>
         <b class="{% if trade_stats.by_direction['long'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
@@ -28,8 +43,11 @@
         </b>
         <small>{{ trade_stats.by_direction['long'].count }} trades</small>
       </div>
+      <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
+        <path d="M0 24 L14 23 L28 22 L42 19 L56 20 L70 17 L84 13 L98 11 L120 8"></path>
+      </svg>
     </div>
-    <div class="summary-cell">
+    <div class="summary-cell direction-card {% if trade_stats.by_direction['short'].pnl_pct >= 0 %}good{% else %}bad{% endif %}">
       <span>SHORT</span>
       <div>
         <b class="{% if trade_stats.by_direction['short'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
@@ -37,6 +55,9 @@
         </b>
         <small>{{ trade_stats.by_direction['short'].count }} trades</small>
       </div>
+      <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
+        <path d="M0 11 L14 14 L28 13 L42 17 L56 18 L70 22 L84 20 L98 25 L120 27"></path>
+      </svg>
     </div>
   </div>
 </section>
@@ -92,6 +113,7 @@
     >
       <div class="signal-top">
         <div class="signal-identity">
+          <span class="coin-badge small">{{ s.asset.replace('USDT', '') }}</span>
           <strong>{{ s.asset.replace('USDT', '') }}</strong>
           <span>{{ s.tf }}</span>
           <b>{{ s.direction|upper }}</b>
