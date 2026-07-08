@@ -18,8 +18,14 @@
     </div>
     <b>--</b>
     <small>USD</small>
-    <svg class="sparkline" viewBox="0 0 120 42" aria-hidden="true">
-      <path d="M0 33 L11 29 L21 31 L31 25 L43 19 L55 22 L67 14 L79 17 L91 10 L103 12 L120 5"></path>
+    <span class="market-h">H --</span>
+    <span class="market-l">L --</span>
+    <svg class="sparkline" viewBox="0 0 160 70" aria-hidden="true">
+      <line x1="0" y1="18" x2="160" y2="18"></line>
+      <line x1="0" y1="36" x2="160" y2="36"></line>
+      <line x1="0" y1="54" x2="160" y2="54"></line>
+      <path class="spark-area" d=""></path>
+      <path class="spark-path" d=""></path>
     </svg>
   </div>
   {% endfor %}
@@ -35,7 +41,11 @@
           <small>{{ item.count }} trades</small>
         </div>
         <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
-          <path d="M0 26 L14 23 L28 25 L42 20 L56 17 L70 19 L84 13 L98 15 L120 8"></path>
+          <line x1="0" y1="9" x2="120" y2="9"></line>
+          <line x1="0" y1="18" x2="120" y2="18"></line>
+          <line x1="0" y1="27" x2="120" y2="27"></line>
+          <path class="spark-area" d="{{ item.spark_area }}"></path>
+          <path class="spark-path" d="{{ item.spark_path }}"></path>
         </svg>
       </div>
     {% endfor %}
@@ -50,7 +60,11 @@
         <small>{{ trade_stats.by_direction['long'].count }} trades</small>
       </div>
       <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
-        <path d="M0 24 L14 23 L28 22 L42 19 L56 20 L70 17 L84 13 L98 11 L120 8"></path>
+        <line x1="0" y1="9" x2="120" y2="9"></line>
+        <line x1="0" y1="18" x2="120" y2="18"></line>
+        <line x1="0" y1="27" x2="120" y2="27"></line>
+        <path class="spark-area" d="{{ trade_stats.by_direction['long'].spark_area }}"></path>
+        <path class="spark-path" d="{{ trade_stats.by_direction['long'].spark_path }}"></path>
       </svg>
     </div>
     <div class="summary-cell direction-card {% if trade_stats.by_direction['short'].pnl_pct >= 0 %}good{% else %}bad{% endif %}">
@@ -62,7 +76,11 @@
         <small>{{ trade_stats.by_direction['short'].count }} trades</small>
       </div>
       <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
-        <path d="M0 11 L14 14 L28 13 L42 17 L56 18 L70 22 L84 20 L98 25 L120 27"></path>
+        <line x1="0" y1="9" x2="120" y2="9"></line>
+        <line x1="0" y1="18" x2="120" y2="18"></line>
+        <line x1="0" y1="27" x2="120" y2="27"></line>
+        <path class="spark-area" d="{{ trade_stats.by_direction['short'].spark_area }}"></path>
+        <path class="spark-path" d="{{ trade_stats.by_direction['short'].spark_path }}"></path>
       </svg>
     </div>
   </div>

@@ -14,6 +14,59 @@
     return sign + value.toFixed(2) + '%';
   }
 
+  function buildSparkPath(values, width, height, pad) {
+    if (!values.length) return { line: '', area: '', min: NaN, max: NaN };
+    var min = Math.min.apply(null, values);
+    var max = Math.max.apply(null, values);
+    var span = max - min || 1;
+    var points = values.map(function(value, idx) {
+      var x = values.length === 1 ? 0 : idx / (values.length - 1) * width;
+      var y = pad + (max - value) / span * (height - pad * 2);
+      return [x, y];
+    });
+    var line = points.map(function(point, idx) {
+      return (idx === 0 ? 'M' : 'L') + point[0].toFixed(2) + ' ' + point[1].toFixed(2);
+    }).join(' ');
+    var area = 'M0 ' + height.toFixed(2) + ' ' + points.map(function(point) {
+      return 'L' + point[0].toFixed(2) + ' ' + point[1].toFixed(2);
+    }).join(' ') + ' L' + width.toFixed(2) + ' ' + height.toFixed(2) + ' Z';
+    return { line: line, area: area, min: min, max: max };
+  }
+
+  function drawMarketSpark(el, klines) {
+    var closes = [];
+    var highs = [];
+    var lows = [];
+    klines.forEach(function(row) {
+      closes.push(Number(row[4]));
+      highs.push(Number(row[2]));
+      lows.push(Number(row[3]));
+    });
+    if (!closes.length) return;
+    var spark = buildSparkPath(closes, 160, 70, 5);
+    var line = el.querySelector('.spark-path');
+    var area = el.querySelector('.spark-area');
+    var highEl = el.querySelector('.market-h');
+    var lowEl = el.querySelector('.market-l');
+    if (line) line.setAttribute('d', spark.line);
+    if (area) area.setAttribute('d', spark.area);
+    if (highEl) highEl.textContent = 'H ' + fmtPrice(Math.max.apply(null, highs));
+    if (lowEl) lowEl.textContent = 'L ' + fmtPrice(Math.min.apply(null, lows));
+  }
+
+  async function updateMarketSparks() {
+    await Promise.all(Array.prototype.slice.call(document.querySelectorAll('[data-ticker]')).map(async function(el) {
+      try {
+        var url = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + encodeURIComponent(el.dataset.ticker) + '&interval=1h&limit=80';
+        var res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) return;
+        drawMarketSpark(el, await res.json());
+      } catch (err) {
+        console.warn('market spark update failed', err);
+      }
+    }));
+  }
+
   function symbols() {
     var set = {};
     cards.forEach(function(card) { set[card.dataset.symbol] = true; });
@@ -89,5 +142,7 @@
   }
 
   update();
+  updateMarketSparks();
   setInterval(update, 4000);
+  setInterval(updateMarketSparks, 60000);
 })();

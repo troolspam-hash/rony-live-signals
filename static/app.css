@@ -199,8 +199,8 @@ input:focus, select:focus {
 
 .market-pill {
   position: relative;
-  min-height: 112px;
-  padding: 14px 16px;
+  min-height: 126px;
+  padding: 16px 18px;
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(11, 23, 37, .94), rgba(5, 9, 15, .96));
@@ -285,10 +285,10 @@ input:focus, select:focus {
   display: block;
   position: relative;
   z-index: 1;
-  margin-top: 12px;
+  margin-top: 16px;
   color: var(--green);
   font-family: var(--mono);
-  font-size: 28px;
+  font-size: 30px;
   line-height: 1;
 }
 
@@ -304,20 +304,34 @@ input:focus, select:focus {
 
 .sparkline {
   position: absolute;
-  right: 15px;
+  right: 18px;
   bottom: 15px;
-  width: 42%;
-  height: 44px;
+  width: 44%;
+  height: 70px;
   opacity: .9;
 }
 
-.sparkline path,
-.mini-spark path {
+.sparkline line,
+.mini-spark line {
+  stroke: rgba(0, 245, 160, .15);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.sparkline .spark-path,
+.mini-spark .spark-path {
   fill: none;
   stroke: var(--green);
-  stroke-width: 2.4;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(0, 245, 160, .38));
+}
+
+.sparkline .spark-area,
+.mini-spark .spark-area {
+  stroke: none;
+  fill: rgba(0, 245, 160, .17);
 }
 
 .sparkline::after {
@@ -325,15 +339,26 @@ input:focus, select:focus {
 }
 
 .market-pill::after {
-  content: "";
+  content: none;
+}
+
+.market-h,
+.market-l {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 46%;
-  height: 55%;
-  background: linear-gradient(180deg, rgba(0, 245, 160, .18), transparent);
-  clip-path: polygon(0 70%, 20% 62%, 40% 66%, 62% 38%, 78% 45%, 100% 10%, 100% 100%, 0 100%);
-  opacity: .55;
+  right: 18px;
+  z-index: 1;
+  color: #d2d9e4;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.market-h {
+  top: 38px;
+}
+
+.market-l {
+  bottom: 12px;
+  color: var(--muted);
 }
 
 .stats-grid {
@@ -511,9 +536,17 @@ input:focus, select:focus {
   filter: drop-shadow(0 0 7px rgba(0, 245, 160, .28));
 }
 
-.summary-cell.bad .mini-spark path {
+.summary-cell.bad .mini-spark .spark-path {
   stroke: var(--red);
   filter: drop-shadow(0 0 7px rgba(255, 77, 115, .22));
+}
+
+.summary-cell.bad .mini-spark .spark-area {
+  fill: rgba(255, 77, 115, .16);
+}
+
+.summary-cell.bad .mini-spark line {
+  stroke: rgba(255, 77, 115, .14);
 }
 
 .summary-cell.good {

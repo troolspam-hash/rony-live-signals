@@ -186,6 +186,42 @@ def admin_required(fn):
 
 
 def compute_trade_stats():
+    def empty_curve():
+        return {
+            "spark_path": "M0 18 L120 18",
+            "spark_area": "M0 36 L0 18 L120 18 L120 36 Z",
+            "spark_min": 0.0,
+            "spark_max": 0.0,
+        }
+
+    def build_curve(values):
+        if not values:
+            return empty_curve()
+        series = [0.0] + [float(v) for v in values]
+        if len(series) == 1:
+            series.append(series[0])
+        width = 120.0
+        height = 36.0
+        pad = 4.0
+        low = min(series)
+        high = max(series)
+        span = high - low
+        if span <= 0:
+            span = 1.0
+        points = []
+        for idx, value in enumerate(series):
+            x = (idx / max(len(series) - 1, 1)) * width
+            y = pad + (high - value) / span * (height - pad * 2)
+            points.append((x, y))
+        path = " ".join(("M" if idx == 0 else "L") + f"{x:.2f} {y:.2f}" for idx, (x, y) in enumerate(points))
+        area = f"M0 {height:.2f} " + " ".join(("L" if idx == 0 else "L") + f"{x:.2f} {y:.2f}" for idx, (x, y) in enumerate(points)) + f" L{width:.2f} {height:.2f} Z"
+        return {
+            "spark_path": path,
+            "spark_area": area,
+            "spark_min": low,
+            "spark_max": high,
+        }
+
     with db() as conn:
         rows = conn.execute("""
             SELECT asset, result, direction, pnl_usd, fees_usd, pnl_pct, exit_time
@@ -204,8 +240,8 @@ def compute_trade_stats():
     pnl = sum(float(r["pnl_usd"] or 0) for r in rows)
     pnl_pct_total = sum(float(r["pnl_pct"] or 0) for r in rows)
     by_direction = {
-        "long": {"pnl_pct": 0.0, "count": 0},
-        "short": {"pnl_pct": 0.0, "count": 0},
+        "long": {"pnl_pct": 0.0, "count": 0, "_curve": []},
+        "short": {"pnl_pct": 0.0, "count": 0, "_curve": []},
     }
     by_asset_map = {}
     for row in rows:
@@ -215,9 +251,16 @@ def compute_trade_stats():
         if direction in by_direction:
             by_direction[direction]["pnl_pct"] += pnl_pct
             by_direction[direction]["count"] += 1
-        item = by_asset_map.setdefault(asset, {"asset": asset, "pnl_pct": 0.0, "count": 0})
+            by_direction[direction]["_curve"].append(by_direction[direction]["pnl_pct"])
+        item = by_asset_map.setdefault(asset, {"asset": asset, "pnl_pct": 0.0, "count": 0, "_curve": []})
         item["pnl_pct"] += pnl_pct
         item["count"] += 1
+        item["_curve"].append(item["pnl_pct"])
+
+    for item in by_direction.values():
+        item.update(build_curve(item.pop("_curve", [])))
+    for item in by_asset_map.values():
+        item.update(build_curve(item.pop("_curve", [])))
 
     equity = INITIAL_CAPITAL
     peak = INITIAL_CAPITAL
