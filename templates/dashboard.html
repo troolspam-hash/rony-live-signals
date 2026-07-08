@@ -31,25 +31,31 @@
   <div class="summary-row direction-summary">
     <div class="summary-cell">
       <span>LONG</span>
-      <b class="{% if trade_stats.by_direction['long'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
-        {{ "%+.2f"|format(trade_stats.by_direction['long'].pnl_pct) }}%
-      </b>
-      <small>{{ trade_stats.by_direction['long'].count }}</small>
+      <div>
+        <b class="{% if trade_stats.by_direction['long'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
+          {{ "%+.2f"|format(trade_stats.by_direction['long'].pnl_pct) }}%
+        </b>
+        <small>{{ trade_stats.by_direction['long'].count }} trades</small>
+      </div>
     </div>
     <div class="summary-cell">
       <span>SHORT</span>
-      <b class="{% if trade_stats.by_direction['short'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
-        {{ "%+.2f"|format(trade_stats.by_direction['short'].pnl_pct) }}%
-      </b>
-      <small>{{ trade_stats.by_direction['short'].count }}</small>
+      <div>
+        <b class="{% if trade_stats.by_direction['short'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
+          {{ "%+.2f"|format(trade_stats.by_direction['short'].pnl_pct) }}%
+        </b>
+        <small>{{ trade_stats.by_direction['short'].count }} trades</small>
+      </div>
     </div>
   </div>
   <div class="summary-row asset-summary">
     {% for item in trade_stats.by_asset %}
       <div class="summary-cell">
         <span>{{ item.asset }}</span>
-        <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
-        <small>{{ item.count }}</small>
+        <div>
+          <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
+          <small>{{ item.count }} trades</small>
+        </div>
       </div>
     {% endfor %}
   </div>
