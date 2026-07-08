@@ -368,6 +368,16 @@ def history():
     asset = request.args.get("asset", "all")
     direction = request.args.get("direction", "all")
     result = request.args.get("result", "all")
+    try:
+        page = max(1, int(request.args.get("page", "1")))
+    except ValueError:
+        page = 1
+    try:
+        per_page = int(request.args.get("per_page", "14"))
+    except ValueError:
+        per_page = 14
+    if per_page not in (14, 25, 50, 100):
+        per_page = 14
     params = []
     where = []
     if asset != "all":
@@ -381,6 +391,10 @@ def history():
         params.append(result)
     sql_where = "WHERE " + " AND ".join(where) if where else ""
     with db() as conn:
+        total = conn.execute(f"SELECT COUNT(*) AS n FROM closed_trades {sql_where}", params).fetchone()["n"]
+        pages = max(1, (total + per_page - 1) // per_page)
+        page = min(page, pages)
+        offset = (page - 1) * per_page
         trades = conn.execute(
             f"""
             SELECT * FROM closed_trades {sql_where}
@@ -390,9 +404,9 @@ def history():
                 ELSE 0
               END DESC,
               exit_time DESC
-            LIMIT 500
+            LIMIT ? OFFSET ?
             """,
-            params,
+            params + [per_page, offset],
         ).fetchall()
         assets = conn.execute("SELECT DISTINCT asset FROM closed_trades ORDER BY asset").fetchall()
     trade_stats = compute_trade_stats()
@@ -404,6 +418,12 @@ def history():
         asset=asset,
         direction=direction,
         result=result,
+        page=page,
+        per_page=per_page,
+        pages=pages,
+        total=total,
+        start_item=(offset + 1 if total else 0),
+        end_item=min(offset + per_page, total),
     )
 
 

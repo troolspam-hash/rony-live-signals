@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+{% set coin_logos = {
+  'BTC': 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png',
+  'ETH': 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+  'SOL': 'https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png',
+  'BNB': 'https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png'
+} %}
 <section class="market-strip">
   {% for coin in [('BTCUSDT','BTC'), ('ETHUSDT','ETH'), ('SOLUSDT','SOL'), ('BNBUSDT','BNB')] %}
   <div class="market-pill coin-{{ coin[1]|lower }}" data-ticker="{{ coin[0] }}">
     <div class="market-main">
-      <span class="coin-badge">{{ coin[1] }}</span>
+      <span class="coin-badge"><img src="{{ coin_logos[coin[1]] }}" alt="{{ coin[1] }}"></span>
       <div>
         <strong>{{ coin[1] }}</strong>
         <em><i></i>Live</em>
@@ -113,8 +119,9 @@
     >
       <div class="signal-top">
         <div class="signal-identity">
-          <span class="coin-badge small">{{ s.asset.replace('USDT', '') }}</span>
-          <strong>{{ s.asset.replace('USDT', '') }}</strong>
+          {% set ticker = s.asset.replace('USDT', '') %}
+          <span class="coin-badge small"><img src="{{ coin_logos.get(ticker, '') }}" alt="{{ ticker }}"></span>
+          <strong>{{ ticker }}</strong>
           <span>{{ s.tf }}</span>
           <b>{{ s.direction|upper }}</b>
           {% if s.status == 'pending' %}
