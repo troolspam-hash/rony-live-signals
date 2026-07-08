@@ -590,7 +590,7 @@ input:focus, select:focus {
     radial-gradient(circle at 18% 0%, rgba(0, 245, 160, .08), transparent 20rem),
     linear-gradient(180deg, rgba(9, 20, 33, .96), rgba(5, 8, 13, .98));
   border-radius: 8px;
-  padding: 16px;
+  padding: 18px 22px 22px;
 }
 
 .signal-card.short {
@@ -631,11 +631,13 @@ input:focus, select:focus {
 .signal-top {
   position: relative;
   justify-content: space-between;
+  gap: 18px;
 }
 
 .signal-identity strong {
   font-family: var(--mono);
-  font-size: 22px;
+  font-size: 26px;
+  line-height: 1;
 }
 
 .signal-identity span {
@@ -652,9 +654,9 @@ input:focus, select:focus {
   color: var(--green);
   border: 1px solid rgba(0, 245, 160, .35);
   border-radius: 6px;
-  padding: 5px 9px;
+  padding: 7px 11px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .signal-card.short .signal-identity b {
@@ -674,28 +676,42 @@ input:focus, select:focus {
 
 .entry-inline {
   color: var(--muted) !important;
-  font-size: 12px;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 14px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(140, 152, 167, .18);
+  font-size: 14px;
   white-space: nowrap;
 }
 
+.entry-inline i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 8px rgba(255, 77, 115, .8);
+}
+
 .live-box {
-  min-width: 150px;
+  min-width: 170px;
   text-align: right;
 }
 
 .live-box span,
-.price-lines span,
+.target-row span,
 .meta {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .live-box strong {
   display: block;
   margin: 2px 0;
   font-family: var(--mono);
-  font-size: 22px;
+  font-size: 26px;
 }
 
 .live-box small {
@@ -703,44 +719,54 @@ input:focus, select:focus {
   font-family: var(--mono);
 }
 
-.price-lines {
+.target-row {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin: 14px 0 13px;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 28px 48px 16px;
 }
 
-.price-lines div {
-  display: grid;
-  grid-template-columns: minmax(98px, auto) auto auto;
+.target-row div {
+  display: flex;
   align-items: baseline;
-  justify-content: start;
-  gap: 8px;
-  min-height: 28px;
-  padding: 0;
+  gap: 14px;
+  min-height: 42px;
 }
 
-.price-lines span,
-.price-lines b,
-.price-lines small {
+.target-row div:last-child {
+  justify-content: center;
+}
+
+.target-row span,
+.target-row b,
+.target-row small {
   font-family: var(--mono);
 }
 
-.price-lines span {
+.target-row span {
+  display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
-.price-lines b {
+.target-row b {
   color: var(--text);
-  font-size: 18px;
+  font-size: 25px;
   line-height: 1.1;
 }
 
-.price-lines small {
+.target-row small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 16px;
+}
+
+.target-row div:first-child small {
+  color: var(--green);
+}
+
+.target-row div:last-child small {
+  color: var(--red);
 }
 
 .range-line {
@@ -749,6 +775,7 @@ input:focus, select:focus {
   overflow: visible;
   background: #171d26;
   border-radius: 999px;
+  margin: 0 10px;
 }
 
 .range-segment {
@@ -1201,7 +1228,7 @@ input:focus, select:focus {
 @media (max-width: 880px) {
   .market-strip,
   .stats-grid,
-  .price-lines,
+  .target-row,
   .direction-summary,
   .asset-summary {
     grid-template-columns: 1fr;
@@ -1237,9 +1264,14 @@ input:focus, select:focus {
   .signal-identity strong {
     font-size: 19px;
   }
-  .price-lines div {
-    grid-template-columns: 1fr;
-    gap: 4px;
+  .target-row {
+    margin: 16px 0 12px;
+  }
+  .target-row div,
+  .target-row div:last-child {
+    justify-content: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
   }
   .range-labels {
     font-size: 10px;

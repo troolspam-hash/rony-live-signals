@@ -148,7 +148,7 @@
           <strong>{{ ticker }}</strong>
           <span>{{ s.tf }}</span>
           <b>{{ s.direction|upper }}</b>
-          <span class="entry-inline">{% if s.status == 'pending' %}Prevista{% else %}Entrada{% endif %} {{ (s.entry_time or s.created_at)|br_time }}</span>
+          <span class="entry-inline">{% if s.status == 'pending' %}Prevista{% else %}Entrada{% endif %} {{ (s.entry_time or s.created_at)|br_time }} <i></i> ${{ s.entry_price|price_fmt }}</span>
           {% if s.status == 'pending' %}
           <em>Aguardando entrada</em>
           {% endif %}
@@ -159,11 +159,7 @@
           <small class="live-price">preco --</small>
         </div>
       </div>
-      <div class="price-lines">
-        <div>
-          <span>{% if s.status == 'pending' %}Referencia{% else %}Entrada{% endif %}</span>
-          <b>${{ s.entry_price|price_fmt }}</b>
-        </div>
+      <div class="target-row">
         <div>
           <span>Take Profit</span>
           <b>${{ s.tp_price|price_fmt }}</b>
