@@ -89,8 +89,7 @@
         {% endif %}
       </div>
       <div class="meta">
-        <span>Criado: {{ s.created_at }}</span>
-        <span>Recebido: {{ s.received_at }}</span>
+        <span>Entrada {{ (s.entry_time or s.created_at)|br_time }}</span>
       </div>
     </article>
     {% else %}

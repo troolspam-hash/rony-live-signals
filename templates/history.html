@@ -47,7 +47,9 @@
       <span>Ativo</span>
       <span>TF</span>
       <span>Dir</span>
+      <span>Abertura</span>
       <span>Entrada</span>
+      <span>Fechamento</span>
       <span>Saida</span>
       <span>Result</span>
       <span>PnL %</span>
@@ -57,7 +59,9 @@
       <strong>{{ t.asset.replace('USDT', '') }}</strong>
       <span>{{ t.tf }}</span>
       <b class="{{ t.direction }}">{{ t.direction|upper }}</b>
+      <span>{{ t.entry_time|br_time }}</span>
       <span>${{ "%.4f"|format(t.entry_price) }}</span>
+      <span>{{ t.exit_time|br_time }}</span>
       <span>${{ "%.4f"|format(t.exit_price) }}</span>
       <b class="{{ t.result }}">{{ t.result|upper if t.result else '-' }}</b>
       <span class="{% if t.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(t.pnl_pct) }}%</span>

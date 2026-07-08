@@ -29,6 +29,17 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+@app.template_filter("br_time")
+def br_time(value):
+    if not value:
+        return "-"
+    try:
+        dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return dt.strftime("%d/%m %H:%M")
+    except ValueError:
+        return str(value)
+
+
 def db():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
