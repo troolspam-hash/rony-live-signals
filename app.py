@@ -176,6 +176,28 @@ def compute_trade_stats():
     }
 
 
+def store_signal(conn, data: dict, received_at: str):
+    conn.execute("""
+        INSERT OR IGNORE INTO signals (
+          id, asset, tf, direction, entry_price, tp_price, sl_price,
+          tp_pct, sl_pct, created_at, entry_time, received_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        str(data["id"]),
+        str(data["asset"]).upper(),
+        str(data["tf"]),
+        str(data["direction"]).lower(),
+        float(data["entry_price"]),
+        float(data["tp_price"]),
+        float(data["sl_price"]),
+        float(data["tp_pct"]),
+        float(data["sl_pct"]),
+        str(data["created_at"]),
+        str(data.get("entry_time")) if data.get("entry_time") else None,
+        received_at,
+    ))
+
+
 @app.context_processor
 def inject_user():
     return {"me": current_user()}
@@ -317,26 +339,34 @@ def ingest_signal():
         return jsonify({"ok": False, "error": "missing fields", "fields": missing}), 400
 
     with db() as conn:
-        conn.execute("""
-            INSERT OR IGNORE INTO signals (
-              id, asset, tf, direction, entry_price, tp_price, sl_price,
-              tp_pct, sl_pct, created_at, entry_time, received_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            str(data["id"]),
-            str(data["asset"]).upper(),
-            str(data["tf"]),
-            str(data["direction"]).lower(),
-            float(data["entry_price"]),
-            float(data["tp_price"]),
-            float(data["sl_price"]),
-            float(data["tp_pct"]),
-            float(data["sl_pct"]),
-            str(data["created_at"]),
-            str(data.get("entry_time")) if data.get("entry_time") else None,
-            utc_now(),
-        ))
+        store_signal(conn, data, utc_now())
     return jsonify({"ok": True})
+
+
+@app.post("/api/open-signals")
+def sync_open_signals():
+    token = request.headers.get("X-Ingest-Token", "")
+    expected = os.getenv("INGEST_TOKEN", "")
+    if not expected or not secrets.compare_digest(token, expected):
+        abort(401)
+
+    data = request.get_json(force=True, silent=False)
+    rows = data.get("signals") if isinstance(data, dict) else data
+    if not isinstance(rows, list):
+        return jsonify({"ok": False, "error": "expected list or {'signals': [...]}"}), 400
+
+    required = ["id", "asset", "tf", "direction", "entry_price", "tp_price", "sl_price", "tp_pct", "sl_pct", "created_at"]
+    now = utc_now()
+    synced = 0
+    with db() as conn:
+        conn.execute("DELETE FROM signals")
+        for signal in rows:
+            missing = [k for k in required if k not in signal or signal.get(k) in (None, "")]
+            if missing:
+                continue
+            store_signal(conn, signal, now)
+            synced += 1
+    return jsonify({"ok": True, "synced": synced})
 
 
 @app.post("/api/trades")
