@@ -148,7 +148,13 @@
           <strong>{{ ticker }}</strong>
           <span>{{ s.tf }}</span>
           <b>{{ s.direction|upper }}</b>
-          <span class="entry-inline">{% if s.status == 'pending' %}Prevista{% else %}Entrada{% endif %} {{ (s.entry_time or s.created_at)|br_time }} <i></i> ${{ s.entry_price|price_fmt }}</span>
+          <span class="entry-inline">
+            {% if s.status == 'pending' %}Prevista{% else %}Entrada{% endif %} {{ (s.entry_time or s.created_at)|br_time }} <i></i> ${{ s.entry_price|price_fmt }}
+            <em class="line-sep"></em>
+            Take Profit <strong>${{ s.tp_price|price_fmt }}</strong> <small class="tp-pct">{{ "%.2f"|format(s.tp_pct) }}%</small>
+            <em class="line-sep"></em>
+            Stop Loss <strong>${{ s.sl_price|price_fmt }}</strong> <small class="sl-pct">{{ "%.2f"|format(s.sl_pct) }}%</small>
+          </span>
           {% if s.status == 'pending' %}
           <em>Aguardando entrada</em>
           {% endif %}
@@ -157,18 +163,6 @@
           <span>Ao vivo</span>
           <strong class="live-pnl">--</strong>
           <small class="live-price">preco --</small>
-        </div>
-      </div>
-      <div class="target-row">
-        <div>
-          <span>Take Profit</span>
-          <b>${{ s.tp_price|price_fmt }}</b>
-          <small>{{ "%.2f"|format(s.tp_pct) }}%</small>
-        </div>
-        <div>
-          <span>Stop Loss</span>
-          <b>${{ s.sl_price|price_fmt }}</b>
-          <small>{{ "%.2f"|format(s.sl_pct) }}%</small>
         </div>
       </div>
       <div class="range-line">

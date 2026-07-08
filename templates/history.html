@@ -26,8 +26,8 @@
       </select>
       <select name="result">
         <option value="all">Todos resultados</option>
-        <option value="tp" {% if result == 'tp' %}selected{% endif %}>TP</option>
-        <option value="sl" {% if result == 'sl' %}selected{% endif %}>SL</option>
+        <option value="tp" {% if result == 'tp' %}selected{% endif %}>Take Profit</option>
+        <option value="sl" {% if result == 'sl' %}selected{% endif %}>Stop Loss</option>
       </select>
       <input type="hidden" name="per_page" value="{{ per_page }}">
       <button type="submit">Filtrar</button>
@@ -56,7 +56,9 @@
       <span>${{ t.entry_price|price_fmt }}</span>
       <span>{{ t.exit_time|br_time }}</span>
       <span>${{ t.exit_price|price_fmt }}</span>
-      <b class="{{ t.result }}">{{ t.result|upper if t.result else '-' }}</b>
+      <b class="{{ t.result }}">
+        {% if t.result == 'tp' %}Take Profit{% elif t.result == 'sl' %}Stop Loss{% else %}-{% endif %}
+      </b>
       <span class="{% if t.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(t.pnl_pct) }}%</span>
     </div>
     {% else %}

@@ -679,11 +679,12 @@ input:focus, select:focus {
   color: var(--muted) !important;
   display: inline-flex !important;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   padding-left: 14px;
   border-left: 1px solid rgba(140, 152, 167, .18);
   font-size: 15px;
   white-space: nowrap;
+  flex-wrap: wrap;
 }
 
 .entry-inline i {
@@ -695,13 +696,40 @@ input:focus, select:focus {
   box-shadow: 0 0 8px rgba(255, 77, 115, .8);
 }
 
+.entry-inline strong {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.entry-inline small {
+  font-size: 15px;
+}
+
+.entry-inline .tp-pct {
+  color: var(--green);
+}
+
+.entry-inline .sl-pct {
+  color: var(--red);
+}
+
+.entry-inline .line-sep {
+  display: inline-block;
+  width: 1px;
+  height: 17px;
+  margin: 0 3px;
+  background: rgba(140, 152, 167, .28);
+  border: 0;
+  padding: 0;
+}
+
 .live-box {
   min-width: 150px;
   text-align: right;
 }
 
 .live-box span,
-.target-row span,
 .meta {
   color: var(--muted);
   font-family: var(--mono);
@@ -712,7 +740,7 @@ input:focus, select:focus {
   display: block;
   margin: 2px 0;
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 20px;
 }
 
 .live-box small {
@@ -721,63 +749,13 @@ input:focus, select:focus {
   font-size: 15px;
 }
 
-.target-row {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin: 22px 48px 14px;
-}
-
-.target-row div {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  min-height: 34px;
-}
-
-.target-row div:last-child {
-  justify-content: center;
-}
-
-.target-row span,
-.target-row b,
-.target-row small {
-  font-family: var(--mono);
-}
-
-.target-row span {
-  display: block;
-  color: var(--muted);
-  font-size: 15px;
-}
-
-.target-row b {
-  color: var(--text);
-  font-size: 15px;
-  line-height: 1.1;
-}
-
-.target-row small {
-  color: var(--muted);
-  font-size: 15px;
-}
-
-.target-row div:first-child small {
-  color: var(--green);
-}
-
-.target-row div:last-child small {
-  color: var(--red);
-}
-
 .range-line {
   position: relative;
   height: 7px;
   overflow: visible;
   background: #171d26;
   border-radius: 999px;
-  margin: 0 10px;
+  margin: 12px 10px 0;
 }
 
 .range-segment {
@@ -1204,7 +1182,6 @@ input:focus, select:focus {
 @media (max-width: 880px) {
   .market-strip,
   .stats-grid,
-  .target-row,
   .direction-summary,
   .asset-summary {
     grid-template-columns: 1fr;
@@ -1240,14 +1217,10 @@ input:focus, select:focus {
   .signal-identity strong {
     font-size: 15px;
   }
-  .target-row {
-    margin: 16px 0 12px;
-  }
-  .target-row div,
-  .target-row div:last-child {
-    justify-content: flex-start;
-    gap: 8px;
-    flex-wrap: wrap;
+  .entry-inline {
+    padding-left: 0;
+    border-left: 0;
+    white-space: normal;
   }
   .history-footer {
     grid-template-columns: 1fr;
