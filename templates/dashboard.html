@@ -25,6 +25,28 @@
   </div>
 </section>
 
+<section class="summary-strip">
+  <div class="summary-box">
+    <span>LONG</span>
+    <b class="{% if trade_stats.by_direction['long'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
+      {{ "%+.2f"|format(trade_stats.by_direction['long'].pnl_pct) }}%
+    </b>
+    <small>{{ trade_stats.by_direction['long'].count }}</small>
+    <span>SHORT</span>
+    <b class="{% if trade_stats.by_direction['short'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
+      {{ "%+.2f"|format(trade_stats.by_direction['short'].pnl_pct) }}%
+    </b>
+    <small>{{ trade_stats.by_direction['short'].count }}</small>
+  </div>
+  <div class="summary-box asset-summary">
+    {% for item in trade_stats.by_asset %}
+      <span>{{ item.asset }}</span>
+      <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
+      <small>{{ item.count }}</small>
+    {% endfor %}
+  </div>
+</section>
+
 <section class="panel">
   <div class="panel-head">
     <h1>Sinais</h1>

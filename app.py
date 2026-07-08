@@ -188,7 +188,7 @@ def admin_required(fn):
 def compute_trade_stats():
     with db() as conn:
         rows = conn.execute("""
-            SELECT result, direction, pnl_usd, fees_usd, exit_time
+            SELECT asset, result, direction, pnl_usd, fees_usd, pnl_pct, exit_time
             FROM closed_trades
             ORDER BY exit_time ASC, id ASC
         """).fetchall()
@@ -202,6 +202,21 @@ def compute_trade_stats():
     gross_loss = sum(abs(min(float(r["pnl_usd"] or 0), 0.0)) for r in rows)
     fees = sum(float(r["fees_usd"] or 0) for r in rows)
     pnl = sum(float(r["pnl_usd"] or 0) for r in rows)
+    by_direction = {
+        "long": {"pnl_pct": 0.0, "count": 0},
+        "short": {"pnl_pct": 0.0, "count": 0},
+    }
+    by_asset_map = {}
+    for row in rows:
+        direction = str(row["direction"]).lower()
+        asset = str(row["asset"]).upper().replace("USDT", "")
+        pnl_pct = float(row["pnl_pct"] or 0)
+        if direction in by_direction:
+            by_direction[direction]["pnl_pct"] += pnl_pct
+            by_direction[direction]["count"] += 1
+        item = by_asset_map.setdefault(asset, {"asset": asset, "pnl_pct": 0.0, "count": 0})
+        item["pnl_pct"] += pnl_pct
+        item["count"] += 1
 
     equity = INITIAL_CAPITAL
     peak = INITIAL_CAPITAL
@@ -223,6 +238,8 @@ def compute_trade_stats():
         "dd": max_dd,
         "pnl": pnl,
         "fees": fees,
+        "by_direction": by_direction,
+        "by_asset": [by_asset_map[k] for k in sorted(by_asset_map)],
     }
 
 
