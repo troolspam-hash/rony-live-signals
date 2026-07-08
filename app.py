@@ -14,6 +14,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(os.getenv("DATABASE_PATH", BASE_DIR / "data" / "live_signals.db"))
+INITIAL_CAPITAL = float(os.getenv("SITE_INITIAL_CAPITAL", "1000"))
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
@@ -64,6 +65,27 @@ def init_db():
             )
         """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_signals_received ON signals(received_at DESC)")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS closed_trades (
+                id TEXT PRIMARY KEY,
+                setup_id TEXT,
+                asset TEXT NOT NULL,
+                tf TEXT NOT NULL,
+                direction TEXT NOT NULL,
+                entry_price REAL NOT NULL,
+                exit_price REAL NOT NULL,
+                entry_time TEXT NOT NULL,
+                exit_time TEXT NOT NULL,
+                size_usd REAL DEFAULT 0,
+                pnl_usd REAL DEFAULT 0,
+                pnl_pct REAL DEFAULT 0,
+                fees_usd REAL DEFAULT 0,
+                result TEXT,
+                received_at TEXT NOT NULL
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_closed_trades_exit ON closed_trades(exit_time DESC)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_closed_trades_asset ON closed_trades(asset, tf, direction)")
 
     admin_user = os.getenv("ADMIN_USERNAME", "admin")
     admin_password = os.getenv("ADMIN_PASSWORD")
@@ -111,6 +133,47 @@ def admin_required(fn):
             abort(403)
         return fn(*args, **kwargs)
     return wrapper
+
+
+def compute_trade_stats():
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT result, direction, pnl_usd, fees_usd, exit_time
+            FROM closed_trades
+            ORDER BY exit_time ASC, id ASC
+        """).fetchall()
+
+    total = len(rows)
+    wins = sum(1 for r in rows if str(r["result"]).lower() == "tp" or float(r["pnl_usd"] or 0) > 0)
+    losses = sum(1 for r in rows if str(r["result"]).lower() == "sl" or float(r["pnl_usd"] or 0) < 0)
+    longs = sum(1 for r in rows if str(r["direction"]).lower() == "long")
+    shorts = sum(1 for r in rows if str(r["direction"]).lower() == "short")
+    gross_profit = sum(max(float(r["pnl_usd"] or 0), 0.0) for r in rows)
+    gross_loss = sum(abs(min(float(r["pnl_usd"] or 0), 0.0)) for r in rows)
+    fees = sum(float(r["fees_usd"] or 0) for r in rows)
+    pnl = sum(float(r["pnl_usd"] or 0) for r in rows)
+
+    equity = INITIAL_CAPITAL
+    peak = INITIAL_CAPITAL
+    max_dd = 0.0
+    for row in rows:
+        equity += float(row["pnl_usd"] or 0)
+        peak = max(peak, equity)
+        if peak > 0:
+            max_dd = min(max_dd, ((equity - peak) / peak) * 100)
+
+    return {
+        "total": total,
+        "wins": wins,
+        "losses": losses,
+        "longs": longs,
+        "shorts": shorts,
+        "wr": (wins / total * 100) if total else None,
+        "pf": (gross_profit / gross_loss) if gross_loss else None,
+        "dd": max_dd,
+        "pnl": pnl,
+        "fees": fees,
+    }
 
 
 @app.context_processor
@@ -176,7 +239,16 @@ def dashboard():
             FROM signals
         """).fetchone()
         assets = conn.execute("SELECT DISTINCT asset FROM signals ORDER BY asset").fetchall()
-    return render_template("dashboard.html", signals=signals, stats=stats, assets=assets, asset=asset, direction=direction)
+    trade_stats = compute_trade_stats()
+    return render_template(
+        "dashboard.html",
+        signals=signals,
+        stats=stats,
+        trade_stats=trade_stats,
+        assets=assets,
+        asset=asset,
+        direction=direction,
+    )
 
 
 @app.route("/admin/users", methods=["GET", "POST"])
@@ -265,6 +337,53 @@ def ingest_signal():
             utc_now(),
         ))
     return jsonify({"ok": True})
+
+
+@app.post("/api/trades")
+def ingest_trades():
+    token = request.headers.get("X-Ingest-Token", "")
+    expected = os.getenv("INGEST_TOKEN", "")
+    if not expected or not secrets.compare_digest(token, expected):
+        abort(401)
+
+    data = request.get_json(force=True, silent=False)
+    rows = data.get("trades") if isinstance(data, dict) else data
+    if not isinstance(rows, list):
+        return jsonify({"ok": False, "error": "expected list or {'trades': [...]}"}), 400
+
+    required = ["id", "asset", "tf", "direction", "entry_price", "exit_price", "entry_time", "exit_time"]
+    now = utc_now()
+    inserted = 0
+    with db() as conn:
+        for trade in rows:
+            missing = [k for k in required if k not in trade or trade.get(k) in (None, "")]
+            if missing:
+                continue
+            conn.execute("""
+                INSERT OR REPLACE INTO closed_trades (
+                  id, setup_id, asset, tf, direction, entry_price, exit_price,
+                  entry_time, exit_time, size_usd, pnl_usd, pnl_pct, fees_usd,
+                  result, received_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                str(trade["id"]),
+                str(trade.get("setup_id")) if trade.get("setup_id") else None,
+                str(trade["asset"]).upper(),
+                str(trade["tf"]),
+                str(trade["direction"]).lower(),
+                float(trade["entry_price"]),
+                float(trade["exit_price"]),
+                str(trade["entry_time"]),
+                str(trade["exit_time"]),
+                float(trade.get("size_usd") or 0),
+                float(trade.get("pnl_usd") or 0),
+                float(trade.get("pnl_pct") or 0),
+                float(trade.get("fees_usd") or 0),
+                str(trade.get("result")).lower() if trade.get("result") else None,
+                now,
+            ))
+            inserted += 1
+    return jsonify({"ok": True, "received": inserted})
 
 
 @app.get("/api/signals")
