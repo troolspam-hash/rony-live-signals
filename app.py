@@ -90,9 +90,13 @@ def init_db():
                 sl_pct REAL NOT NULL,
                 created_at TEXT NOT NULL,
                 entry_time TEXT,
+                status TEXT DEFAULT 'open',
                 received_at TEXT NOT NULL
             )
         """)
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(open_signals)")}
+        if "status" not in cols:
+            conn.execute("ALTER TABLE open_signals ADD COLUMN status TEXT DEFAULT 'open'")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_signals_received ON signals(received_at DESC)")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS open_signals (
@@ -226,12 +230,8 @@ def store_signal(conn, data: dict, received_at: str, table: str = "signals", rep
     if table not in ("signals", "open_signals"):
         raise ValueError("invalid signal table")
     mode = "INSERT OR REPLACE" if replace else "INSERT OR IGNORE"
-    conn.execute(f"""
-        {mode} INTO {table} (
-          id, asset, tf, direction, entry_price, tp_price, sl_price,
-          tp_pct, sl_pct, created_at, entry_time, received_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
+    columns = "id, asset, tf, direction, entry_price, tp_price, sl_price, tp_pct, sl_pct, created_at, entry_time"
+    values = [
         str(data["id"]),
         str(data["asset"]).upper(),
         str(data["tf"]),
@@ -243,8 +243,14 @@ def store_signal(conn, data: dict, received_at: str, table: str = "signals", rep
         float(data["sl_pct"]),
         str(data["created_at"]),
         str(data.get("entry_time")) if data.get("entry_time") else None,
-        received_at,
-    ))
+    ]
+    if table == "open_signals":
+        columns += ", status"
+        values.append(str(data.get("status") or "open"))
+    columns += ", received_at"
+    values.append(received_at)
+    placeholders = ", ".join("?" for _ in values)
+    conn.execute(f"{mode} INTO {table} ({columns}) VALUES ({placeholders})", values)
 
 
 @app.context_processor
@@ -299,7 +305,11 @@ def dashboard():
     sql_where = "WHERE " + " AND ".join(where) if where else ""
     with db() as conn:
         open_signals = conn.execute(
-            f"SELECT * FROM open_signals {sql_where} ORDER BY received_at DESC LIMIT 300",
+            f"""
+            SELECT * FROM open_signals {sql_where}
+            ORDER BY COALESCE(entry_time, created_at, received_at) DESC, received_at DESC
+            LIMIT 300
+            """,
             params,
         ).fetchall()
         history_signals = conn.execute(

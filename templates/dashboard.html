@@ -47,7 +47,7 @@
   <div class="signal-list" id="signalsList">
     {% for s in open_signals %}
     <article
-      class="signal-card {{ s.direction }}"
+      class="signal-card {{ s.direction }} {{ s.status or 'open' }}"
       data-symbol="{{ s.asset }}"
       data-direction="{{ s.direction }}"
       data-entry="{{ s.entry_price }}"
@@ -59,6 +59,9 @@
           <strong>{{ s.asset.replace('USDT', '') }}</strong>
           <span>{{ s.tf }}</span>
           <b>{{ s.direction|upper }}</b>
+          {% if s.status == 'pending' %}
+          <em>Aguardando entrada</em>
+          {% endif %}
         </div>
         <div class="live-box">
           <span>Ao vivo</span>
@@ -67,7 +70,10 @@
         </div>
       </div>
       <div class="price-grid">
-        <div><span>Entrada</span><b>${{ s.entry_price|price_fmt }}</b></div>
+        <div>
+          <span>{% if s.status == 'pending' %}Referencia{% else %}Entrada{% endif %}</span>
+          <b>${{ s.entry_price|price_fmt }}</b>
+        </div>
         <div><span>TP</span><b>${{ s.tp_price|price_fmt }}</b><small>{{ "%.2f"|format(s.tp_pct) }}%</small></div>
         <div><span>SL</span><b>${{ s.sl_price|price_fmt }}</b><small>{{ "%.2f"|format(s.sl_pct) }}%</small></div>
       </div>
@@ -89,7 +95,7 @@
         {% endif %}
       </div>
       <div class="meta">
-        <span>Entrada {{ (s.entry_time or s.created_at)|br_time }}</span>
+        <span>{% if s.status == 'pending' %}Entrada prevista{% else %}Entrada{% endif %} {{ (s.entry_time or s.created_at)|br_time }}</span>
       </div>
     </article>
     {% else %}

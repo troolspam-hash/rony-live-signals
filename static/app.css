@@ -288,6 +288,10 @@ input:focus, select:focus {
   border-left-color: var(--red);
 }
 
+.signal-card.pending {
+  border-left-color: var(--yellow);
+}
+
 .signal-card::before {
   content: "";
   position: absolute;
@@ -336,6 +340,16 @@ input:focus, select:focus {
 .signal-card.short .signal-identity b {
   color: var(--red);
   border-color: rgba(255, 77, 115, .38);
+}
+
+.signal-identity em {
+  color: var(--yellow);
+  border: 1px solid rgba(243, 199, 79, .34);
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-style: normal;
 }
 
 .live-box {
