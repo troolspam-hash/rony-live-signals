@@ -198,20 +198,40 @@ input:focus, select:focus {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
   margin-bottom: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(8, 10, 13, .94);
 }
 
 .stat {
-  padding: 17px;
+  padding: 17px 20px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+}
+
+.stat:last-child {
+  border-right: 0;
 }
 
 .stat strong {
   display: block;
   margin-top: 8px;
   font-family: var(--mono);
-  font-size: 28px;
+  font-size: 22px;
+  font-style: normal;
+}
+
+.stat strong em {
+  font-style: normal;
+}
+
+.muted-stat {
+  color: var(--text);
 }
 
 .stat small {

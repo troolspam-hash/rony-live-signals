@@ -8,9 +8,31 @@
 </section>
 
 <section class="stats-grid">
-  <div class="stat"><span>Total</span><strong>{{ stats.total or 0 }}</strong><small>sinais recebidos</small></div>
-  <div class="stat"><span>Long</span><strong class="up">{{ stats.longs or 0 }}</strong><small>compras</small></div>
-  <div class="stat"><span>Short</span><strong class="down">{{ stats.shorts or 0 }}</strong><small>vendas</small></div>
+  <div class="stat">
+    <span>Trades</span>
+    <strong>{{ stats.total or 0 }}</strong>
+    <small>sinais recebidos</small>
+  </div>
+  <div class="stat">
+    <span>Win Rate</span>
+    <strong class="muted-stat">--</strong>
+    <small>aguardando fechamentos</small>
+  </div>
+  <div class="stat">
+    <span>Trades</span>
+    <strong><em class="up">{{ stats.longs or 0 }}</em>/<em class="down">{{ stats.shorts or 0 }}</em></strong>
+    <small>long / short</small>
+  </div>
+  <div class="stat">
+    <span>Drawdown</span>
+    <strong class="muted-stat">--</strong>
+    <small>aguardando equity</small>
+  </div>
+  <div class="stat">
+    <span>Profit Factor</span>
+    <strong class="muted-stat">--</strong>
+    <small>aguardando PnL</small>
+  </div>
 </section>
 
 <section class="panel">

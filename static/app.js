@@ -45,10 +45,10 @@
       var list = symbols();
       var prices = {};
       await Promise.all(list.map(async function(symbol) {
-        var res = await fetch('https://fapi.binance.com/fapi/v1/ticker/price?symbol=' + encodeURIComponent(symbol), { cache: 'no-store' });
+        var res = await fetch('https://fapi.binance.com/fapi/v1/premiumIndex?symbol=' + encodeURIComponent(symbol), { cache: 'no-store' });
         if (!res.ok) return;
         var data = await res.json();
-        prices[symbol] = Number(data.price);
+        prices[symbol] = Number(data.markPrice || data.price);
       }));
 
       document.querySelectorAll('[data-ticker]').forEach(function(el) {
@@ -69,7 +69,7 @@
           pnlEl.classList.toggle('positive', pnl >= 0);
           pnlEl.classList.toggle('negative', pnl < 0);
         }
-        if (priceEl) priceEl.textContent = 'preco $' + fmtPrice(price);
+        if (priceEl) priceEl.textContent = 'mark $' + fmtPrice(price);
         if (fill) fill.style.width = calcProgress(card, price).toFixed(1) + '%';
       });
     } catch (err) {
