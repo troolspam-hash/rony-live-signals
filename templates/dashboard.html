@@ -18,11 +18,6 @@
     <strong>{% if trade_stats.wr is not none %}{{ "%.1f"|format(trade_stats.wr) }}%{% else %}--{% endif %}</strong>
     <small>{{ trade_stats.wins }}/{{ trade_stats.losses }} green / loss</small>
   </div>
-  <div class="stat">
-    <span>Trades</span>
-    <strong><em class="up">{{ trade_stats.longs }}</em>/<em class="down">{{ trade_stats.shorts }}</em></strong>
-    <small>long / short</small>
-  </div>
 </section>
 
 <section class="summary-strip">
