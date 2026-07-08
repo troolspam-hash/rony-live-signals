@@ -70,7 +70,7 @@
 
 <section class="stats-grid">
   <div class="stat">
-    <span class="stat-icon">&#9636;</span>
+    <span class="stat-icon"><img src="https://cdn-icons-png.magnific.com/512/18/18383.png" alt="Trades"></span>
     <div>
       <span>Trades</span>
       <strong>{{ trade_stats.total }}</strong>
@@ -78,7 +78,7 @@
     </div>
   </div>
   <div class="stat">
-    <span class="stat-icon">&#9678;</span>
+    <span class="stat-icon"><img src="https://cdn-icons-png.flaticon.com/512/934/934640.png" alt="Win Rate"></span>
     <div>
       <span>Win Rate</span>
       <strong>{% if trade_stats.wr is not none %}{{ "%.1f"|format(trade_stats.wr) }}%{% else %}--{% endif %}</strong>
@@ -86,7 +86,7 @@
     </div>
   </div>
   <div class="stat">
-    <span class="stat-icon">&#8599;</span>
+    <span class="stat-icon"><img src="https://static.vecteezy.com/system/resources/previews/014/455/897/non_2x/money-icon-on-transparent-background-free-png.png" alt="PnL"></span>
     <div>
       <span>PnL %</span>
       <strong class="{% if trade_stats.pnl_pct >= 0 %}up{% else %}down{% endif %}">

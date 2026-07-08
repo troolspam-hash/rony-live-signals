@@ -394,6 +394,26 @@ input:focus, select:focus {
   text-transform: none !important;
 }
 
+.stat-icon img {
+  display: block;
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 7px rgba(0, 245, 160, .38))
+    saturate(1.12);
+}
+
+.stat:nth-child(2) .stat-icon img {
+  width: 64%;
+  height: 64%;
+}
+
+.stat:nth-child(3) .stat-icon img {
+  width: 72%;
+  height: 72%;
+}
+
 .stat strong em {
   font-style: normal;
 }
