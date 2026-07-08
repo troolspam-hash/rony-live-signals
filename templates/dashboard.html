@@ -23,16 +23,6 @@
     <strong><em class="up">{{ trade_stats.longs }}</em>/<em class="down">{{ trade_stats.shorts }}</em></strong>
     <small>long / short</small>
   </div>
-  <div class="stat">
-    <span>Drawdown</span>
-    <strong class="{% if trade_stats.dd < 0 %}down{% endif %}">{{ "%.1f"|format(trade_stats.dd) }}%</strong>
-    <small>capital base $1,000</small>
-  </div>
-  <div class="stat">
-    <span>Profit Factor</span>
-    <strong>{% if trade_stats.pf is not none %}{{ "%.2f"|format(trade_stats.pf) }}{% else %}--{% endif %}</strong>
-    <small>PnL ${{ "%.2f"|format(trade_stats.pnl) }} | fees ${{ "%.2f"|format(trade_stats.fees) }}</small>
-  </div>
 </section>
 
 <section class="panel">

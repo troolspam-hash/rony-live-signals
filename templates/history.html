@@ -16,16 +16,6 @@
     <strong><em class="up">{{ trade_stats.longs }}</em>/<em class="down">{{ trade_stats.shorts }}</em></strong>
     <small>long / short</small>
   </div>
-  <div class="stat">
-    <span>Drawdown</span>
-    <strong class="{% if trade_stats.dd < 0 %}down{% endif %}">{{ "%.1f"|format(trade_stats.dd) }}%</strong>
-    <small>capital base $1,000</small>
-  </div>
-  <div class="stat">
-    <span>Profit Factor</span>
-    <strong>{% if trade_stats.pf is not none %}{{ "%.2f"|format(trade_stats.pf) }}{% else %}--{% endif %}</strong>
-    <small>PnL ${{ "%.2f"|format(trade_stats.pnl) }} | fees ${{ "%.2f"|format(trade_stats.fees) }}</small>
-  </div>
 </section>
 
 <section class="panel">
@@ -54,7 +44,6 @@
 
   <div class="trade-table">
     <div class="trade-head">
-      <span>Setup</span>
       <span>Ativo</span>
       <span>TF</span>
       <span>Dir</span>
@@ -62,12 +51,9 @@
       <span>Saida</span>
       <span>Result</span>
       <span>PnL %</span>
-      <span>PnL $</span>
-      <span>Fees</span>
     </div>
     {% for t in trades %}
     <div class="trade-row">
-      <span>{{ t.setup_id or '-' }}</span>
       <strong>{{ t.asset.replace('USDT', '') }}</strong>
       <span>{{ t.tf }}</span>
       <b class="{{ t.direction }}">{{ t.direction|upper }}</b>
@@ -75,8 +61,6 @@
       <span>${{ "%.4f"|format(t.exit_price) }}</span>
       <b class="{{ t.result }}">{{ t.result|upper if t.result else '-' }}</b>
       <span class="{% if t.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(t.pnl_pct) }}%</span>
-      <span class="{% if t.pnl_usd >= 0 %}up{% else %}down{% endif %}">${{ "%+.2f"|format(t.pnl_usd) }}</span>
-      <span>${{ "%.2f"|format(t.fees_usd) }}</span>
     </div>
     {% else %}
     <div class="empty">Nenhum trade fechado recebido ainda.</div>

@@ -198,7 +198,7 @@ input:focus, select:focus {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   margin-bottom: 16px;
   border: 1px solid var(--line);
@@ -548,10 +548,10 @@ input:focus, select:focus {
 .trade-head,
 .trade-row {
   display: grid;
-  grid-template-columns: minmax(120px, 1.1fr) 70px 52px 78px repeat(2, minmax(110px, 1fr)) 78px 82px 90px 70px;
+  grid-template-columns: 72px 52px 78px repeat(2, minmax(120px, 1fr)) 78px 82px;
   gap: 12px;
   align-items: center;
-  min-width: 1040px;
+  min-width: 720px;
   padding: 12px 16px;
   border-top: 1px solid var(--line);
   font-family: var(--mono);
