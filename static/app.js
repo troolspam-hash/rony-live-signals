@@ -1,6 +1,5 @@
 (function() {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.signal-card[data-symbol]'));
-  if (!cards.length) return;
 
   function fmtPrice(value) {
     if (!Number.isFinite(value)) return '--';
