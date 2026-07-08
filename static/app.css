@@ -198,7 +198,7 @@ input:focus, select:focus {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   margin-bottom: 16px;
   border: 1px solid var(--line);
@@ -245,49 +245,50 @@ input:focus, select:focus {
 .up { color: var(--green); }
 .down { color: var(--red); }
 
-.summary-strip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.summary-panel {
+  display: grid;
+  gap: 12px;
   margin: -4px 0 16px;
-  overflow-x: auto;
-}
-
-.summary-box {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 42px;
-  width: fit-content;
-  max-width: 100%;
-  padding: 0 12px;
+  padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: rgba(8, 10, 13, .94);
   font-family: var(--mono);
-  white-space: nowrap;
-  overflow: visible;
 }
 
-.summary-box span {
+.summary-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.summary-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.summary-item span {
   color: var(--text);
+  font-size: 16px;
   font-weight: 800;
 }
 
-.summary-box b {
-  font-size: 13px;
+.summary-item b {
+  font-size: 15px;
 }
 
-.summary-box small {
+.summary-item small {
   color: var(--muted);
-  font-size: 10px;
-  margin-right: 6px;
+  font-size: 12px;
 }
 
 .asset-summary {
-  flex: 0 1 auto;
-  min-width: fit-content;
-  overflow-x: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(34, 43, 56, .78);
 }
 
 .panel {

@@ -202,6 +202,7 @@ def compute_trade_stats():
     gross_loss = sum(abs(min(float(r["pnl_usd"] or 0), 0.0)) for r in rows)
     fees = sum(float(r["fees_usd"] or 0) for r in rows)
     pnl = sum(float(r["pnl_usd"] or 0) for r in rows)
+    pnl_pct_total = sum(float(r["pnl_pct"] or 0) for r in rows)
     by_direction = {
         "long": {"pnl_pct": 0.0, "count": 0},
         "short": {"pnl_pct": 0.0, "count": 0},
@@ -237,6 +238,7 @@ def compute_trade_stats():
         "pf": (gross_profit / gross_loss) if gross_loss else None,
         "dd": max_dd,
         "pnl": pnl,
+        "pnl_pct": pnl_pct_total,
         "fees": fees,
         "by_direction": by_direction,
         "by_asset": [by_asset_map[k] for k in sorted(by_asset_map)],

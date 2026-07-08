@@ -18,26 +18,39 @@
     <strong>{% if trade_stats.wr is not none %}{{ "%.1f"|format(trade_stats.wr) }}%{% else %}--{% endif %}</strong>
     <small>{{ trade_stats.wins }}/{{ trade_stats.losses }} green / loss</small>
   </div>
+  <div class="stat">
+    <span>PnL %</span>
+    <strong class="{% if trade_stats.pnl_pct >= 0 %}up{% else %}down{% endif %}">
+      {{ "%+.2f"|format(trade_stats.pnl_pct) }}%
+    </strong>
+    <small>soma dos trades finalizados</small>
+  </div>
 </section>
 
-<section class="summary-strip">
-  <div class="summary-box">
-    <span>LONG</span>
-    <b class="{% if trade_stats.by_direction['long'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
-      {{ "%+.2f"|format(trade_stats.by_direction['long'].pnl_pct) }}%
-    </b>
-    <small>{{ trade_stats.by_direction['long'].count }}</small>
-    <span>SHORT</span>
-    <b class="{% if trade_stats.by_direction['short'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
-      {{ "%+.2f"|format(trade_stats.by_direction['short'].pnl_pct) }}%
-    </b>
-    <small>{{ trade_stats.by_direction['short'].count }}</small>
+<section class="summary-panel">
+  <div class="summary-row">
+    <div class="summary-item">
+      <span>LONG</span>
+      <b class="{% if trade_stats.by_direction['long'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
+        {{ "%+.2f"|format(trade_stats.by_direction['long'].pnl_pct) }}%
+      </b>
+      <small>{{ trade_stats.by_direction['long'].count }}</small>
+    </div>
+    <div class="summary-item">
+      <span>SHORT</span>
+      <b class="{% if trade_stats.by_direction['short'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
+        {{ "%+.2f"|format(trade_stats.by_direction['short'].pnl_pct) }}%
+      </b>
+      <small>{{ trade_stats.by_direction['short'].count }}</small>
+    </div>
   </div>
-  <div class="summary-box asset-summary">
+  <div class="summary-row asset-summary">
     {% for item in trade_stats.by_asset %}
-      <span>{{ item.asset }}</span>
-      <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
-      <small>{{ item.count }}</small>
+      <div class="summary-item">
+        <span>{{ item.asset }}</span>
+        <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
+        <small>{{ item.count }}</small>
+      </div>
     {% endfor %}
   </div>
 </section>
