@@ -304,6 +304,42 @@ def dashboard():
     )
 
 
+@app.get("/history")
+@login_required
+def history():
+    asset = request.args.get("asset", "all")
+    direction = request.args.get("direction", "all")
+    result = request.args.get("result", "all")
+    params = []
+    where = []
+    if asset != "all":
+        where.append("asset=?")
+        params.append(asset)
+    if direction != "all":
+        where.append("direction=?")
+        params.append(direction)
+    if result != "all":
+        where.append("result=?")
+        params.append(result)
+    sql_where = "WHERE " + " AND ".join(where) if where else ""
+    with db() as conn:
+        trades = conn.execute(
+            f"SELECT * FROM closed_trades {sql_where} ORDER BY exit_time DESC LIMIT 500",
+            params,
+        ).fetchall()
+        assets = conn.execute("SELECT DISTINCT asset FROM closed_trades ORDER BY asset").fetchall()
+    trade_stats = compute_trade_stats()
+    return render_template(
+        "history.html",
+        trades=trades,
+        trade_stats=trade_stats,
+        assets=assets,
+        asset=asset,
+        direction=direction,
+        result=result,
+    )
+
+
 @app.route("/admin/users", methods=["GET", "POST"])
 @admin_required
 def admin_users():

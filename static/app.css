@@ -465,6 +465,57 @@ input:focus, select:focus {
   border-color: rgba(255, 77, 115, .38);
 }
 
+.trade-table {
+  overflow-x: auto;
+}
+
+.trade-head,
+.trade-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.1fr) 70px 52px 78px repeat(2, minmax(110px, 1fr)) 78px 82px 90px 70px;
+  gap: 12px;
+  align-items: center;
+  min-width: 1040px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+}
+
+.trade-head {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  background: rgba(13, 17, 23, .56);
+}
+
+.trade-row {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.trade-row strong {
+  font-size: 15px;
+}
+
+.trade-row b {
+  width: fit-content;
+  border: 1px solid rgba(0, 245, 160, .35);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--green);
+  font-size: 11px;
+}
+
+.trade-row b.short,
+.trade-row b.sl {
+  color: var(--red);
+  border-color: rgba(255, 77, 115, .38);
+}
+
+.trade-row span {
+  white-space: nowrap;
+}
+
 .users-table {
   width: 100%;
   border-collapse: collapse;

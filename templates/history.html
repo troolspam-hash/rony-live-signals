@@ -1,12 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="market-strip">
-  <div class="market-pill" data-ticker="BTCUSDT"><span>BTC</span><b>--</b></div>
-  <div class="market-pill" data-ticker="ETHUSDT"><span>ETH</span><b>--</b></div>
-  <div class="market-pill" data-ticker="SOLUSDT"><span>SOL</span><b>--</b></div>
-  <div class="market-pill" data-ticker="BNBUSDT"><span>BNB</span><b>--</b></div>
-</section>
-
 <section class="stats-grid">
   <div class="stat">
     <span>Trades</span>
@@ -37,7 +30,7 @@
 
 <section class="panel">
   <div class="panel-head">
-    <h1>Sinais</h1>
+    <h1>Historico</h1>
     <form class="filters" method="get">
       <select name="asset">
         <option value="all">Todos ativos</option>
@@ -50,49 +43,44 @@
         <option value="long" {% if direction == 'long' %}selected{% endif %}>Long</option>
         <option value="short" {% if direction == 'short' %}selected{% endif %}>Short</option>
       </select>
+      <select name="result">
+        <option value="all">Todos resultados</option>
+        <option value="tp" {% if result == 'tp' %}selected{% endif %}>TP</option>
+        <option value="sl" {% if result == 'sl' %}selected{% endif %}>SL</option>
+      </select>
       <button type="submit">Filtrar</button>
     </form>
   </div>
 
-  <div class="signal-list" id="signalsList">
-    {% for s in open_signals %}
-    <article
-      class="signal-card {{ s.direction }}"
-      data-symbol="{{ s.asset }}"
-      data-direction="{{ s.direction }}"
-      data-entry="{{ s.entry_price }}"
-      data-tp="{{ s.tp_price }}"
-      data-sl="{{ s.sl_price }}"
-    >
-      <div class="signal-top">
-        <div class="signal-identity">
-          <strong>{{ s.asset.replace('USDT', '') }}</strong>
-          <span>{{ s.tf }}</span>
-          <b>{{ s.direction|upper }}</b>
-        </div>
-        <div class="live-box">
-          <span>Ao vivo</span>
-          <strong class="live-pnl">--</strong>
-          <small class="live-price">preco --</small>
-        </div>
-      </div>
-      <div class="price-grid">
-        <div><span>Entrada</span><b>${{ "%.4f"|format(s.entry_price) }}</b></div>
-        <div><span>TP</span><b>${{ "%.4f"|format(s.tp_price) }}</b><small>{{ "%.2f"|format(s.tp_pct) }}%</small></div>
-        <div><span>SL</span><b>${{ "%.4f"|format(s.sl_price) }}</b><small>{{ "%.2f"|format(s.sl_pct) }}%</small></div>
-      </div>
-      <div class="range-line">
-        <span class="range-fill"></span>
-      </div>
-      <div class="meta">
-        <span>Criado: {{ s.created_at }}</span>
-        <span>Recebido: {{ s.received_at }}</span>
-      </div>
-    </article>
+  <div class="trade-table">
+    <div class="trade-head">
+      <span>Setup</span>
+      <span>Ativo</span>
+      <span>TF</span>
+      <span>Dir</span>
+      <span>Entrada</span>
+      <span>Saida</span>
+      <span>Result</span>
+      <span>PnL %</span>
+      <span>PnL $</span>
+      <span>Fees</span>
+    </div>
+    {% for t in trades %}
+    <div class="trade-row">
+      <span>{{ t.setup_id or '-' }}</span>
+      <strong>{{ t.asset.replace('USDT', '') }}</strong>
+      <span>{{ t.tf }}</span>
+      <b class="{{ t.direction }}">{{ t.direction|upper }}</b>
+      <span>${{ "%.4f"|format(t.entry_price) }}</span>
+      <span>${{ "%.4f"|format(t.exit_price) }}</span>
+      <b class="{{ t.result }}">{{ t.result|upper if t.result else '-' }}</b>
+      <span class="{% if t.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(t.pnl_pct) }}%</span>
+      <span class="{% if t.pnl_usd >= 0 %}up{% else %}down{% endif %}">${{ "%+.2f"|format(t.pnl_usd) }}</span>
+      <span>${{ "%.2f"|format(t.fees_usd) }}</span>
+    </div>
     {% else %}
-    <div class="empty">Nenhum sinal aberto no momento.</div>
+    <div class="empty">Nenhum trade fechado recebido ainda.</div>
     {% endfor %}
   </div>
 </section>
-
 {% endblock %}

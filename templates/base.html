@@ -18,6 +18,7 @@
     {% if me %}
     <nav class="nav">
       <a href="{{ url_for('dashboard') }}">Sinais</a>
+      <a href="{{ url_for('history') }}">Historico</a>
       {% if me.role == 'admin' %}
       <a href="{{ url_for('admin_users') }}">Admin</a>
       {% endif %}
