@@ -481,11 +481,11 @@ input:focus, select:focus {
 
 .summary-cell {
   display: grid;
-  grid-template-columns: 80px minmax(120px, 1fr) 32%;
+  grid-template-columns: 76px minmax(150px, 1fr) 42%;
   align-items: center;
-  gap: 12px;
-  min-height: 76px;
-  padding: 14px 18px;
+  gap: 16px;
+  min-height: 74px;
+  padding: 13px 20px;
   border-right: 1px solid var(--line);
 }
 
@@ -507,26 +507,26 @@ input:focus, select:focus {
 .summary-cell div {
   display: flex;
   align-items: baseline;
-  gap: 9px;
+  gap: 10px;
   min-width: 0;
 }
 
 .summary-cell b {
-  font-size: 23px;
+  font-size: 25px;
   letter-spacing: 0;
   line-height: 1;
 }
 
 .summary-cell small {
   color: var(--dim);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1;
   white-space: nowrap;
 }
 
 .mini-spark {
   width: 100%;
-  height: 34px;
+  height: 42px;
   opacity: .85;
   filter: drop-shadow(0 0 7px rgba(0, 245, 160, .28));
 }
@@ -702,14 +702,14 @@ input:focus, select:focus {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin: 14px 0 12px;
+  margin: 12px 0 11px;
 }
 
 .price-grid div {
   border: 1px solid rgba(48, 59, 77, .8);
   border-radius: 7px;
-  min-height: 76px;
-  padding: 11px 12px;
+  min-height: 62px;
+  padding: 9px 12px;
   background: rgba(3, 9, 17, .54);
 }
 
@@ -722,11 +722,13 @@ input:focus, select:focus {
 
 .price-grid b {
   color: var(--text);
-  font-size: 16px;
+  font-size: 18px;
+  line-height: 1.1;
 }
 
 .price-grid small {
   color: var(--muted);
+  font-size: 12px;
 }
 
 .range-line {
@@ -827,7 +829,9 @@ input:focus, select:focus {
 
 .meta {
   position: relative;
-  margin-top: 10px;
+  margin-top: 8px;
+  font-size: 11px;
+  opacity: .82;
 }
 
 .positive { color: var(--green) !important; }
@@ -1143,15 +1147,18 @@ input:focus, select:focus {
     height: 58px;
   }
   .summary-cell {
-    grid-template-columns: 70px minmax(112px, 1fr) minmax(90px, 28%);
-    gap: 9px;
+    grid-template-columns: 64px minmax(112px, 1fr) minmax(110px, 34%);
+    gap: 10px;
     padding: 13px 14px;
   }
   .summary-cell b {
-    font-size: 21px;
+    font-size: 22px;
   }
   .summary-cell small {
-    font-size: 11px;
+    font-size: 12px;
+  }
+  .mini-spark {
+    height: 36px;
   }
 }
 

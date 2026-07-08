@@ -163,8 +163,8 @@
           <span>{% if s.status == 'pending' %}Referencia{% else %}Entrada{% endif %}</span>
           <b>${{ s.entry_price|price_fmt }}</b>
         </div>
-        <div><span>TP</span><b>${{ s.tp_price|price_fmt }}</b><small>{{ "%.2f"|format(s.tp_pct) }}%</small></div>
-        <div><span>SL</span><b>${{ s.sl_price|price_fmt }}</b><small>{{ "%.2f"|format(s.sl_pct) }}%</small></div>
+        <div><span>Take Profit</span><b>${{ s.tp_price|price_fmt }}</b><small>{{ "%.2f"|format(s.tp_pct) }}%</small></div>
+        <div><span>Stop Loss</span><b>${{ s.sl_price|price_fmt }}</b><small>{{ "%.2f"|format(s.sl_pct) }}%</small></div>
       </div>
       <div class="range-line">
         <span class="range-segment left"></span>
