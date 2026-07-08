@@ -35,23 +35,15 @@
 
   function drawMarketSpark(el, klines) {
     var closes = [];
-    var highs = [];
-    var lows = [];
     klines.forEach(function(row) {
       closes.push(Number(row[4]));
-      highs.push(Number(row[2]));
-      lows.push(Number(row[3]));
     });
     if (!closes.length) return;
     var spark = buildSparkPath(closes, 160, 70, 5);
     var line = el.querySelector('.spark-path');
     var area = el.querySelector('.spark-area');
-    var highEl = el.querySelector('.market-h');
-    var lowEl = el.querySelector('.market-l');
     if (line) line.setAttribute('d', spark.line);
     if (area) area.setAttribute('d', spark.area);
-    if (highEl) highEl.textContent = 'H ' + fmtPrice(Math.max.apply(null, highs));
-    if (lowEl) lowEl.textContent = 'L ' + fmtPrice(Math.min.apply(null, lows));
   }
 
   async function updateMarketSparks() {
