@@ -422,6 +422,49 @@ input:focus, select:focus {
 .positive { color: var(--green) !important; }
 .negative { color: var(--red) !important; }
 
+.history-panel {
+  margin-top: 16px;
+}
+
+.history-list {
+  display: grid;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: 90px 58px 80px repeat(3, minmax(130px, 1fr)) minmax(190px, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.history-row strong {
+  font-size: 15px;
+}
+
+.history-row span,
+.history-row small {
+  color: var(--muted);
+}
+
+.history-row b {
+  width: fit-content;
+  border: 1px solid rgba(0, 245, 160, .35);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--green);
+  font-size: 11px;
+}
+
+.history-row b.short {
+  color: var(--red);
+  border-color: rgba(255, 77, 115, .38);
+}
+
 .users-table {
   width: 100%;
   border-collapse: collapse;

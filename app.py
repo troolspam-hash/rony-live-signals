@@ -66,6 +66,23 @@ def init_db():
         """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_signals_received ON signals(received_at DESC)")
         conn.execute("""
+            CREATE TABLE IF NOT EXISTS open_signals (
+                id TEXT PRIMARY KEY,
+                asset TEXT NOT NULL,
+                tf TEXT NOT NULL,
+                direction TEXT NOT NULL,
+                entry_price REAL NOT NULL,
+                tp_price REAL NOT NULL,
+                sl_price REAL NOT NULL,
+                tp_pct REAL NOT NULL,
+                sl_pct REAL NOT NULL,
+                created_at TEXT NOT NULL,
+                entry_time TEXT,
+                received_at TEXT NOT NULL
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_open_signals_received ON open_signals(received_at DESC)")
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS closed_trades (
                 id TEXT PRIMARY KEY,
                 setup_id TEXT,
@@ -176,9 +193,12 @@ def compute_trade_stats():
     }
 
 
-def store_signal(conn, data: dict, received_at: str):
-    conn.execute("""
-        INSERT OR IGNORE INTO signals (
+def store_signal(conn, data: dict, received_at: str, table: str = "signals", replace: bool = False):
+    if table not in ("signals", "open_signals"):
+        raise ValueError("invalid signal table")
+    mode = "INSERT OR REPLACE" if replace else "INSERT OR IGNORE"
+    conn.execute(f"""
+        {mode} INTO {table} (
           id, asset, tf, direction, entry_price, tp_price, sl_price,
           tp_pct, sl_pct, created_at, entry_time, received_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -249,7 +269,11 @@ def dashboard():
         params.append(direction)
     sql_where = "WHERE " + " AND ".join(where) if where else ""
     with db() as conn:
-        signals = conn.execute(
+        open_signals = conn.execute(
+            f"SELECT * FROM open_signals {sql_where} ORDER BY received_at DESC LIMIT 300",
+            params,
+        ).fetchall()
+        history_signals = conn.execute(
             f"SELECT * FROM signals {sql_where} ORDER BY received_at DESC LIMIT 300",
             params,
         ).fetchall()
@@ -258,13 +282,20 @@ def dashboard():
               COUNT(*) AS total,
               SUM(CASE WHEN direction='long' THEN 1 ELSE 0 END) AS longs,
               SUM(CASE WHEN direction='short' THEN 1 ELSE 0 END) AS shorts
-            FROM signals
+            FROM open_signals
         """).fetchone()
-        assets = conn.execute("SELECT DISTINCT asset FROM signals ORDER BY asset").fetchall()
+        assets = conn.execute("""
+            SELECT asset FROM (
+                SELECT DISTINCT asset FROM open_signals
+                UNION
+                SELECT DISTINCT asset FROM signals
+            ) ORDER BY asset
+        """).fetchall()
     trade_stats = compute_trade_stats()
     return render_template(
         "dashboard.html",
-        signals=signals,
+        open_signals=open_signals,
+        history_signals=history_signals,
         stats=stats,
         trade_stats=trade_stats,
         assets=assets,
@@ -359,12 +390,12 @@ def sync_open_signals():
     now = utc_now()
     synced = 0
     with db() as conn:
-        conn.execute("DELETE FROM signals")
+        conn.execute("DELETE FROM open_signals")
         for signal in rows:
             missing = [k for k in required if k not in signal or signal.get(k) in (None, "")]
             if missing:
                 continue
-            store_signal(conn, signal, now)
+            store_signal(conn, signal, now, table="open_signals", replace=True)
             synced += 1
     return jsonify({"ok": True, "synced": synced})
 

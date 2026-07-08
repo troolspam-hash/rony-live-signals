@@ -55,7 +55,7 @@
   </div>
 
   <div class="signal-list" id="signalsList">
-    {% for s in signals %}
+    {% for s in open_signals %}
     <article
       class="signal-card {{ s.direction }}"
       data-symbol="{{ s.asset }}"
@@ -90,7 +90,28 @@
       </div>
     </article>
     {% else %}
-    <div class="empty">Nenhum sinal recebido ainda.</div>
+    <div class="empty">Nenhum sinal aberto no momento.</div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel history-panel">
+  <div class="panel-head">
+    <h1>Historico de Sinais</h1>
+  </div>
+  <div class="history-list">
+    {% for s in history_signals %}
+    <div class="history-row">
+      <strong>{{ s.asset.replace('USDT', '') }}</strong>
+      <span>{{ s.tf }}</span>
+      <b class="{{ s.direction }}">{{ s.direction|upper }}</b>
+      <span>Entrada ${{ "%.4f"|format(s.entry_price) }}</span>
+      <span>TP ${{ "%.4f"|format(s.tp_price) }}</span>
+      <span>SL ${{ "%.4f"|format(s.sl_price) }}</span>
+      <small>{{ s.created_at }}</small>
+    </div>
+    {% else %}
+    <div class="empty">Nenhum historico recebido ainda.</div>
     {% endfor %}
   </div>
 </section>
