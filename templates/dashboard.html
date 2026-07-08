@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="stats-grid">
+  <div class="stat"><span>Total</span><strong>{{ stats.total or 0 }}</strong></div>
+  <div class="stat"><span>Long</span><strong class="up">{{ stats.longs or 0 }}</strong></div>
+  <div class="stat"><span>Short</span><strong class="down">{{ stats.shorts or 0 }}</strong></div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h1>Sinais</h1>
+    <form class="filters" method="get">
+      <select name="asset">
+        <option value="all">Todos ativos</option>
+        {% for row in assets %}
+          <option value="{{ row.asset }}" {% if asset == row.asset %}selected{% endif %}>{{ row.asset }}</option>
+        {% endfor %}
+      </select>
+      <select name="direction">
+        <option value="all">Todas direcoes</option>
+        <option value="long" {% if direction == 'long' %}selected{% endif %}>Long</option>
+        <option value="short" {% if direction == 'short' %}selected{% endif %}>Short</option>
+      </select>
+      <button type="submit">Filtrar</button>
+    </form>
+  </div>
+
+  <div class="signal-list">
+    {% for s in signals %}
+    <article class="signal-card {{ s.direction }}">
+      <div class="signal-main">
+        <strong>{{ s.asset }}</strong>
+        <span>{{ s.tf }}</span>
+        <b>{{ s.direction|upper }}</b>
+      </div>
+      <div class="prices">
+        <span>Entrada <b>${{ "%.4f"|format(s.entry_price) }}</b></span>
+        <span>TP <b>${{ "%.4f"|format(s.tp_price) }} / {{ "%.2f"|format(s.tp_pct) }}%</b></span>
+        <span>SL <b>${{ "%.4f"|format(s.sl_price) }} / {{ "%.2f"|format(s.sl_pct) }}%</b></span>
+      </div>
+      <div class="meta">
+        <span>Criado: {{ s.created_at }}</span>
+        <span>Recebido: {{ s.received_at }}</span>
+      </div>
+    </article>
+    {% else %}
+    <div class="empty">Nenhum sinal recebido ainda.</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

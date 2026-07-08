@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth-shell">
+  <form class="auth-card" method="post">
+    <h1>Acesso ao painel</h1>
+    <p>Entre para visualizar os sinais em tempo real.</p>
+    <label>Usuario</label>
+    <input name="username" autocomplete="username" required>
+    <label>Senha</label>
+    <input name="password" type="password" autocomplete="current-password" required>
+    <button class="primary" type="submit">Entrar</button>
+  </form>
+</section>
+{% endblock %}

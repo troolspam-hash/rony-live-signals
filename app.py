@@ -1,0 +1,279 @@
+import os
+import sqlite3
+import secrets
+from datetime import datetime, timezone
+from functools import wraps
+from pathlib import Path
+
+from flask import (
+    Flask, abort, flash, jsonify, redirect, render_template,
+    request, session, url_for,
+)
+from werkzeug.security import check_password_hash, generate_password_hash
+
+
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = Path(os.getenv("DATABASE_PATH", BASE_DIR / "data" / "live_signals.db"))
+
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "1") == "1",
+)
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def db():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    with db() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'user',
+                active INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS signals (
+                id TEXT PRIMARY KEY,
+                asset TEXT NOT NULL,
+                tf TEXT NOT NULL,
+                direction TEXT NOT NULL,
+                entry_price REAL NOT NULL,
+                tp_price REAL NOT NULL,
+                sl_price REAL NOT NULL,
+                tp_pct REAL NOT NULL,
+                sl_pct REAL NOT NULL,
+                created_at TEXT NOT NULL,
+                entry_time TEXT,
+                received_at TEXT NOT NULL
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_signals_received ON signals(received_at DESC)")
+
+    admin_user = os.getenv("ADMIN_USERNAME", "admin")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    with db() as conn:
+        exists = conn.execute("SELECT id FROM users WHERE role='admin' LIMIT 1").fetchone()
+        if not exists and admin_password:
+            conn.execute(
+                "INSERT INTO users (username, password_hash, role, active, created_at) VALUES (?, ?, 'admin', 1, ?)",
+                (admin_user, generate_password_hash(admin_password), utc_now()),
+            )
+
+
+@app.before_request
+def ensure_db():
+    init_db()
+
+
+def current_user():
+    uid = session.get("user_id")
+    if not uid:
+        return None
+    with db() as conn:
+        return conn.execute(
+            "SELECT id, username, role, active FROM users WHERE id=? AND active=1",
+            (uid,),
+        ).fetchone()
+
+
+def login_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not current_user():
+            return redirect(url_for("login", next=request.path))
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+def admin_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        user = current_user()
+        if not user:
+            return redirect(url_for("login", next=request.path))
+        if user["role"] != "admin":
+            abort(403)
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+@app.context_processor
+def inject_user():
+    return {"me": current_user()}
+
+
+@app.get("/")
+def home():
+    if current_user():
+        return redirect(url_for("dashboard"))
+    return redirect(url_for("login"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        with db() as conn:
+            user = conn.execute(
+                "SELECT * FROM users WHERE username=? AND active=1",
+                (username,),
+            ).fetchone()
+        if user and check_password_hash(user["password_hash"], password):
+            session.clear()
+            session["user_id"] = user["id"]
+            return redirect(request.args.get("next") or url_for("dashboard"))
+        flash("Usuario ou senha invalidos", "error")
+    return render_template("login.html")
+
+
+@app.post("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+@app.get("/dashboard")
+@login_required
+def dashboard():
+    asset = request.args.get("asset", "all")
+    direction = request.args.get("direction", "all")
+    params = []
+    where = []
+    if asset != "all":
+        where.append("asset=?")
+        params.append(asset)
+    if direction != "all":
+        where.append("direction=?")
+        params.append(direction)
+    sql_where = "WHERE " + " AND ".join(where) if where else ""
+    with db() as conn:
+        signals = conn.execute(
+            f"SELECT * FROM signals {sql_where} ORDER BY received_at DESC LIMIT 300",
+            params,
+        ).fetchall()
+        stats = conn.execute("""
+            SELECT
+              COUNT(*) AS total,
+              SUM(CASE WHEN direction='long' THEN 1 ELSE 0 END) AS longs,
+              SUM(CASE WHEN direction='short' THEN 1 ELSE 0 END) AS shorts
+            FROM signals
+        """).fetchone()
+        assets = conn.execute("SELECT DISTINCT asset FROM signals ORDER BY asset").fetchall()
+    return render_template("dashboard.html", signals=signals, stats=stats, assets=assets, asset=asset, direction=direction)
+
+
+@app.route("/admin/users", methods=["GET", "POST"])
+@admin_required
+def admin_users():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        role = request.form.get("role", "user")
+        if not username or not password:
+            flash("Informe usuario e senha", "error")
+        elif role not in ("user", "admin"):
+            flash("Role invalida", "error")
+        else:
+            try:
+                with db() as conn:
+                    conn.execute(
+                        "INSERT INTO users (username, password_hash, role, active, created_at) VALUES (?, ?, ?, 1, ?)",
+                        (username, generate_password_hash(password), role, utc_now()),
+                    )
+                flash("Usuario criado", "success")
+            except sqlite3.IntegrityError:
+                flash("Usuario ja existe", "error")
+    with db() as conn:
+        users = conn.execute("SELECT id, username, role, active, created_at FROM users ORDER BY id").fetchall()
+    return render_template("admin_users.html", users=users)
+
+
+@app.post("/admin/users/<int:user_id>/toggle")
+@admin_required
+def toggle_user(user_id):
+    user = current_user()
+    if user and user["id"] == user_id:
+        flash("Voce nao pode desativar seu proprio usuario", "error")
+        return redirect(url_for("admin_users"))
+    with db() as conn:
+        row = conn.execute("SELECT active FROM users WHERE id=?", (user_id,)).fetchone()
+        if row:
+            conn.execute("UPDATE users SET active=? WHERE id=?", (0 if row["active"] else 1, user_id))
+    return redirect(url_for("admin_users"))
+
+
+@app.post("/admin/users/<int:user_id>/delete")
+@admin_required
+def delete_user(user_id):
+    user = current_user()
+    if user and user["id"] == user_id:
+        flash("Voce nao pode remover seu proprio usuario", "error")
+        return redirect(url_for("admin_users"))
+    with db() as conn:
+        conn.execute("DELETE FROM users WHERE id=?", (user_id,))
+    return redirect(url_for("admin_users"))
+
+
+@app.post("/api/signals")
+def ingest_signal():
+    token = request.headers.get("X-Ingest-Token", "")
+    expected = os.getenv("INGEST_TOKEN", "")
+    if not expected or not secrets.compare_digest(token, expected):
+        abort(401)
+
+    data = request.get_json(force=True, silent=False)
+    required = ["id", "asset", "tf", "direction", "entry_price", "tp_price", "sl_price", "tp_pct", "sl_pct", "created_at"]
+    missing = [k for k in required if k not in data]
+    if missing:
+        return jsonify({"ok": False, "error": "missing fields", "fields": missing}), 400
+
+    with db() as conn:
+        conn.execute("""
+            INSERT OR IGNORE INTO signals (
+              id, asset, tf, direction, entry_price, tp_price, sl_price,
+              tp_pct, sl_pct, created_at, entry_time, received_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            str(data["id"]),
+            str(data["asset"]).upper(),
+            str(data["tf"]),
+            str(data["direction"]).lower(),
+            float(data["entry_price"]),
+            float(data["tp_price"]),
+            float(data["sl_price"]),
+            float(data["tp_pct"]),
+            float(data["sl_pct"]),
+            str(data["created_at"]),
+            str(data.get("entry_time")) if data.get("entry_time") else None,
+            utc_now(),
+        ))
+    return jsonify({"ok": True})
+
+
+@app.get("/api/signals")
+@login_required
+def api_signals():
+    with db() as conn:
+        rows = conn.execute("SELECT * FROM signals ORDER BY received_at DESC LIMIT 100").fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=True)

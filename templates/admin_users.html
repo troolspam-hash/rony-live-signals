@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel admin-panel">
+  <div class="panel-head">
+    <h1>Usuarios</h1>
+  </div>
+
+  <form class="user-form" method="post">
+    <input name="username" placeholder="usuario" required>
+    <input name="password" placeholder="senha" type="password" required>
+    <select name="role">
+      <option value="user">user</option>
+      <option value="admin">admin</option>
+    </select>
+    <button class="primary" type="submit">Adicionar</button>
+  </form>
+
+  <table class="users-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Usuario</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Criado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.role }}</td>
+        <td>{{ "ativo" if u.active else "inativo" }}</td>
+        <td>{{ u.created_at }}</td>
+        <td class="actions">
+          <form method="post" action="{{ url_for('toggle_user', user_id=u.id) }}">
+            <button type="submit">{{ "Desativar" if u.active else "Ativar" }}</button>
+          </form>
+          <form method="post" action="{{ url_for('delete_user', user_id=u.id) }}">
+            <button class="danger" type="submit">Remover</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
