@@ -28,6 +28,35 @@
   {% endfor %}
 </section>
 
+<section class="stats-grid">
+  <div class="stat">
+    <span class="stat-icon"><img src="https://cdn-icons-png.magnific.com/512/18/18383.png" alt="Trades"></span>
+    <div>
+      <span>Trades</span>
+      <strong>{{ trade_stats.total }}</strong>
+      <small>fechados no historico</small>
+    </div>
+  </div>
+  <div class="stat">
+    <span class="stat-icon"><img src="https://cdn-icons-png.flaticon.com/512/934/934640.png" alt="Win Rate"></span>
+    <div>
+      <span>Win Rate</span>
+      <strong>{% if trade_stats.wr is not none %}{{ "%.1f"|format(trade_stats.wr) }}%{% else %}--{% endif %}</strong>
+      <small>{{ trade_stats.wins }}/{{ trade_stats.losses }} green / loss</small>
+    </div>
+  </div>
+  <div class="stat">
+    <span class="stat-icon"><img src="https://static.vecteezy.com/system/resources/previews/014/455/897/non_2x/money-icon-on-transparent-background-free-png.png" alt="PnL"></span>
+    <div>
+      <span>PnL %</span>
+      <strong class="{% if trade_stats.pnl_pct >= 0 %}up{% else %}down{% endif %}">
+        {{ "%+.2f"|format(trade_stats.pnl_pct) }}%
+      </strong>
+      <small>acumulado finalizado</small>
+    </div>
+  </div>
+</section>
+
 <section class="summary-panel">
   <div class="summary-row asset-summary">
     {% for item in trade_stats.by_asset %}
@@ -83,35 +112,6 @@
   </div>
 </section>
 
-<section class="stats-grid">
-  <div class="stat">
-    <span class="stat-icon"><img src="https://cdn-icons-png.magnific.com/512/18/18383.png" alt="Trades"></span>
-    <div>
-      <span>Trades</span>
-      <strong>{{ trade_stats.total }}</strong>
-      <small>fechados no historico</small>
-    </div>
-  </div>
-  <div class="stat">
-    <span class="stat-icon"><img src="https://cdn-icons-png.flaticon.com/512/934/934640.png" alt="Win Rate"></span>
-    <div>
-      <span>Win Rate</span>
-      <strong>{% if trade_stats.wr is not none %}{{ "%.1f"|format(trade_stats.wr) }}%{% else %}--{% endif %}</strong>
-      <small>{{ trade_stats.wins }}/{{ trade_stats.losses }} green / loss</small>
-    </div>
-  </div>
-  <div class="stat">
-    <span class="stat-icon"><img src="https://static.vecteezy.com/system/resources/previews/014/455/897/non_2x/money-icon-on-transparent-background-free-png.png" alt="PnL"></span>
-    <div>
-      <span>PnL %</span>
-      <strong class="{% if trade_stats.pnl_pct >= 0 %}up{% else %}down{% endif %}">
-        {{ "%+.2f"|format(trade_stats.pnl_pct) }}%
-      </strong>
-      <small>acumulado finalizado</small>
-    </div>
-  </div>
-</section>
-
 <section class="panel">
   <div class="panel-head">
     <h1>Sinais</h1>
@@ -148,6 +148,7 @@
           <strong>{{ ticker }}</strong>
           <span>{{ s.tf }}</span>
           <b>{{ s.direction|upper }}</b>
+          <span class="entry-inline">{% if s.status == 'pending' %}Prevista{% else %}Entrada{% endif %} {{ (s.entry_time or s.created_at)|br_time }}</span>
           {% if s.status == 'pending' %}
           <em>Aguardando entrada</em>
           {% endif %}
@@ -158,13 +159,21 @@
           <small class="live-price">preco --</small>
         </div>
       </div>
-      <div class="price-grid">
+      <div class="price-lines">
         <div>
           <span>{% if s.status == 'pending' %}Referencia{% else %}Entrada{% endif %}</span>
           <b>${{ s.entry_price|price_fmt }}</b>
         </div>
-        <div><span>Take Profit</span><b>${{ s.tp_price|price_fmt }}</b><small>{{ "%.2f"|format(s.tp_pct) }}%</small></div>
-        <div><span>Stop Loss</span><b>${{ s.sl_price|price_fmt }}</b><small>{{ "%.2f"|format(s.sl_pct) }}%</small></div>
+        <div>
+          <span>Take Profit</span>
+          <b>${{ s.tp_price|price_fmt }}</b>
+          <small>{{ "%.2f"|format(s.tp_pct) }}%</small>
+        </div>
+        <div>
+          <span>Stop Loss</span>
+          <b>${{ s.sl_price|price_fmt }}</b>
+          <small>{{ "%.2f"|format(s.sl_pct) }}%</small>
+        </div>
       </div>
       <div class="range-line">
         <span class="range-segment left"></span>
@@ -182,9 +191,6 @@
           <span>Entrada ${{ s.entry_price|price_fmt }}</span>
           <span class="tp-label">TP ${{ s.tp_price|price_fmt }}</span>
         {% endif %}
-      </div>
-      <div class="meta">
-        <span>{% if s.status == 'pending' %}Entrada prevista{% else %}Entrada{% endif %} {{ (s.entry_time or s.created_at)|br_time }}</span>
       </div>
     </article>
     {% else %}

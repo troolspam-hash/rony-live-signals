@@ -672,13 +672,19 @@ input:focus, select:focus {
   font-style: normal;
 }
 
+.entry-inline {
+  color: var(--muted) !important;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .live-box {
   min-width: 150px;
   text-align: right;
 }
 
 .live-box span,
-.price-grid span,
+.price-lines span,
 .meta {
   color: var(--muted);
   font-family: var(--mono);
@@ -697,36 +703,42 @@ input:focus, select:focus {
   font-family: var(--mono);
 }
 
-.price-grid {
+.price-lines {
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 12px 0 11px;
+  gap: 14px;
+  margin: 14px 0 13px;
 }
 
-.price-grid div {
-  border: 1px solid rgba(48, 59, 77, .8);
-  border-radius: 7px;
-  min-height: 62px;
-  padding: 9px 12px;
-  background: rgba(3, 9, 17, .54);
+.price-lines div {
+  display: grid;
+  grid-template-columns: minmax(98px, auto) auto auto;
+  align-items: baseline;
+  justify-content: start;
+  gap: 8px;
+  min-height: 28px;
+  padding: 0;
 }
 
-.price-grid b,
-.price-grid small {
-  display: block;
-  margin-top: 5px;
+.price-lines span,
+.price-lines b,
+.price-lines small {
   font-family: var(--mono);
 }
 
-.price-grid b {
+.price-lines span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.price-lines b {
   color: var(--text);
   font-size: 18px;
   line-height: 1.1;
 }
 
-.price-grid small {
+.price-lines small {
   color: var(--muted);
   font-size: 12px;
 }
@@ -1189,7 +1201,7 @@ input:focus, select:focus {
 @media (max-width: 880px) {
   .market-strip,
   .stats-grid,
-  .price-grid,
+  .price-lines,
   .direction-summary,
   .asset-summary {
     grid-template-columns: 1fr;
@@ -1224,6 +1236,10 @@ input:focus, select:focus {
   }
   .signal-identity strong {
     font-size: 19px;
+  }
+  .price-lines div {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
   .range-labels {
     font-size: 10px;
