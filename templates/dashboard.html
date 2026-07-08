@@ -82,7 +82,21 @@
         <div><span>SL</span><b>${{ "%.4f"|format(s.sl_price) }}</b><small>{{ "%.2f"|format(s.sl_pct) }}%</small></div>
       </div>
       <div class="range-line">
-        <span class="range-fill"></span>
+        <span class="range-segment left"></span>
+        <span class="range-segment right"></span>
+        <span class="range-center"></span>
+        <span class="range-thumb"></span>
+      </div>
+      <div class="range-labels">
+        {% if s.direction == 'short' %}
+          <span class="tp-label">TP ${{ "%.4f"|format(s.tp_price) }}</span>
+          <span>Entrada ${{ "%.4f"|format(s.entry_price) }}</span>
+          <span class="sl-label">SL ${{ "%.4f"|format(s.sl_price) }}</span>
+        {% else %}
+          <span class="sl-label">SL ${{ "%.4f"|format(s.sl_price) }}</span>
+          <span>Entrada ${{ "%.4f"|format(s.entry_price) }}</span>
+          <span class="tp-label">TP ${{ "%.4f"|format(s.tp_price) }}</span>
+        {% endif %}
       </div>
       <div class="meta">
         <span>Criado: {{ s.created_at }}</span>

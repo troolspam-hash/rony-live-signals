@@ -29,15 +29,22 @@
     return (price - entry) / entry * 100;
   }
 
-  function calcProgress(card, price) {
+  function calcMarkerPosition(card, price) {
     var entry = Number(card.dataset.entry);
     var tp = Number(card.dataset.tp);
     var sl = Number(card.dataset.sl);
     if (!entry || !tp || !sl || !price) return 0;
-    var low = Math.min(tp, sl);
-    var high = Math.max(tp, sl);
-    if (high === low) return 0;
-    return Math.max(0, Math.min(100, (price - low) / (high - low) * 100));
+    var direction = card.dataset.direction;
+    var pnl = calcPnl(card, price);
+    var tpDist = Math.abs(tp - entry);
+    var slDist = Math.abs(sl - entry);
+    var distance = Math.abs(price - entry);
+    if (pnl >= 0) {
+      var profitRatio = tpDist ? Math.min(1, distance / tpDist) : 0;
+      return direction === 'short' ? 50 - profitRatio * 50 : 50 + profitRatio * 50;
+    }
+    var lossRatio = slDist ? Math.min(1, distance / slDist) : 0;
+    return direction === 'short' ? 50 + lossRatio * 50 : 50 - lossRatio * 50;
   }
 
   async function update() {
@@ -63,14 +70,18 @@
         var pnl = calcPnl(card, price);
         var pnlEl = card.querySelector('.live-pnl');
         var priceEl = card.querySelector('.live-price');
-        var fill = card.querySelector('.range-fill');
+        var thumb = card.querySelector('.range-thumb');
         if (pnlEl) {
           pnlEl.textContent = fmtPct(pnl);
           pnlEl.classList.toggle('positive', pnl >= 0);
           pnlEl.classList.toggle('negative', pnl < 0);
         }
         if (priceEl) priceEl.textContent = 'mark $' + fmtPrice(price);
-        if (fill) fill.style.width = calcProgress(card, price).toFixed(1) + '%';
+        if (thumb) {
+          thumb.style.left = calcMarkerPosition(card, price).toFixed(1) + '%';
+          thumb.classList.toggle('positive', pnl >= 0);
+          thumb.classList.toggle('negative', pnl < 0);
+        }
       });
     } catch (err) {
       console.warn('live price update failed', err);
