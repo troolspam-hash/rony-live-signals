@@ -353,7 +353,16 @@ def history():
     sql_where = "WHERE " + " AND ".join(where) if where else ""
     with db() as conn:
         trades = conn.execute(
-            f"SELECT * FROM closed_trades {sql_where} ORDER BY exit_time DESC LIMIT 500",
+            f"""
+            SELECT * FROM closed_trades {sql_where}
+            ORDER BY
+              CASE
+                WHEN instr(id, '|') > 0 THEN CAST(substr(id, 1, instr(id, '|') - 1) AS INTEGER)
+                ELSE 0
+              END DESC,
+              exit_time DESC
+            LIMIT 500
+            """,
             params,
         ).fetchall()
         assets = conn.execute("SELECT DISTINCT asset FROM closed_trades ORDER BY asset").fetchall()
