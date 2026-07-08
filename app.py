@@ -90,13 +90,9 @@ def init_db():
                 sl_pct REAL NOT NULL,
                 created_at TEXT NOT NULL,
                 entry_time TEXT,
-                status TEXT DEFAULT 'open',
                 received_at TEXT NOT NULL
             )
         """)
-        cols = {row[1] for row in conn.execute("PRAGMA table_info(open_signals)")}
-        if "status" not in cols:
-            conn.execute("ALTER TABLE open_signals ADD COLUMN status TEXT DEFAULT 'open'")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_signals_received ON signals(received_at DESC)")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS open_signals (
@@ -111,9 +107,13 @@ def init_db():
                 sl_pct REAL NOT NULL,
                 created_at TEXT NOT NULL,
                 entry_time TEXT,
+                status TEXT DEFAULT 'open',
                 received_at TEXT NOT NULL
             )
         """)
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(open_signals)")}
+        if "status" not in cols:
+            conn.execute("ALTER TABLE open_signals ADD COLUMN status TEXT DEFAULT 'open'")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_open_signals_received ON open_signals(received_at DESC)")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS closed_trades (
