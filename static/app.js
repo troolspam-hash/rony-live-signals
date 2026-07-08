@@ -1,5 +1,28 @@
 (function() {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.signal-card[data-symbol]'));
+  var knownSignalIds = {};
+  var signalAlertReady = false;
+  var signalPollInitialized = false;
+
+  cards.forEach(function(card) {
+    if (card.dataset.signalId) knownSignalIds[card.dataset.signalId] = true;
+  });
+
+  function unlockSignalAlert() {
+    var audio = document.getElementById('signalAlertAudio');
+    if (!audio || signalAlertReady) return;
+    audio.volume = 0.85;
+    audio.play().then(function() {
+      audio.pause();
+      audio.currentTime = 0;
+      signalAlertReady = true;
+    }).catch(function() {
+      signalAlertReady = true;
+    });
+  }
+
+  document.addEventListener('click', unlockSignalAlert, { once: true });
+  document.addEventListener('keydown', unlockSignalAlert, { once: true });
 
   function fmtPrice(value) {
     if (!Number.isFinite(value)) return '--';
@@ -133,8 +156,41 @@
     }
   }
 
+  async function checkNewSignals() {
+    var audio = document.getElementById('signalAlertAudio');
+    if (!audio) return;
+    try {
+      var res = await fetch('/api/open-signals', { cache: 'no-store' });
+      if (!res.ok) return;
+      var rows = await res.json();
+      var hasNew = false;
+      rows.forEach(function(row) {
+        if (!row.id) return;
+        if (!signalPollInitialized) {
+          knownSignalIds[row.id] = true;
+          return;
+        }
+        if (!knownSignalIds[row.id]) {
+          knownSignalIds[row.id] = true;
+          hasNew = true;
+        }
+      });
+      signalPollInitialized = true;
+      if (hasNew) {
+        audio.currentTime = 0;
+        audio.play().catch(function() {
+          console.warn('alert sound blocked until user interaction');
+        });
+      }
+    } catch (err) {
+      console.warn('signal alert check failed', err);
+    }
+  }
+
   update();
   updateMarketSparks();
+  checkNewSignals();
   setInterval(update, 4000);
   setInterval(updateMarketSparks, 60000);
+  setInterval(checkNewSignals, 5000);
 })();

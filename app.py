@@ -8,12 +8,13 @@ from zoneinfo import ZoneInfo
 
 from flask import (
     Flask, abort, flash, jsonify, redirect, render_template,
-    request, session, url_for,
+    request, send_from_directory, session, url_for,
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
 BASE_DIR = Path(__file__).resolve().parent
+ALERT_DIR = BASE_DIR / "alerta"
 DB_PATH = Path(os.getenv("DATABASE_PATH", BASE_DIR / "data" / "live_signals.db"))
 INITIAL_CAPITAL = float(os.getenv("SITE_INITIAL_CAPITAL", "1000"))
 DISPLAY_TZ = ZoneInfo(os.getenv("DISPLAY_TIMEZONE", "America/Sao_Paulo"))
@@ -564,6 +565,25 @@ def sync_open_signals():
             store_signal(conn, signal, now, table="open_signals", replace=True)
             synced += 1
     return jsonify({"ok": True, "synced": synced})
+
+
+@app.get("/api/open-signals")
+@login_required
+def api_open_signals():
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT id, received_at
+            FROM open_signals
+            ORDER BY COALESCE(entry_time, created_at, received_at) DESC, received_at DESC
+            LIMIT 500
+        """).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
+@app.get("/alerta/<path:filename>")
+@login_required
+def alert_file(filename):
+    return send_from_directory(ALERT_DIR, filename)
 
 
 @app.post("/api/trades")

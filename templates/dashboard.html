@@ -135,6 +135,7 @@
     {% for s in open_signals %}
     <article
       class="signal-card {{ s.direction }} {{ s.status or 'open' }}"
+      data-signal-id="{{ s.id }}"
       data-symbol="{{ s.asset }}"
       data-direction="{{ s.direction }}"
       data-entry="{{ s.entry_price }}"
@@ -177,5 +178,7 @@
     {% endfor %}
   </div>
 </section>
+
+<audio id="signalAlertAudio" preload="auto" src="{{ url_for('alert_file', filename='universfield-new-notification-023-494260.mp3') }}"></audio>
 
 {% endblock %}
