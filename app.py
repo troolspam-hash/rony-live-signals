@@ -4,6 +4,7 @@ import secrets
 from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from flask import (
     Flask, abort, flash, jsonify, redirect, render_template,
@@ -15,6 +16,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(os.getenv("DATABASE_PATH", BASE_DIR / "data" / "live_signals.db"))
 INITIAL_CAPITAL = float(os.getenv("SITE_INITIAL_CAPITAL", "1000"))
+DISPLAY_TZ = ZoneInfo(os.getenv("DISPLAY_TIMEZONE", "America/Sao_Paulo"))
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
@@ -35,9 +37,25 @@ def br_time(value):
         return "-"
     try:
         dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.astimezone(DISPLAY_TZ)
         return dt.strftime("%d/%m %H:%M")
     except ValueError:
         return str(value)
+
+
+@app.template_filter("price_fmt")
+def price_fmt(value):
+    try:
+        price = float(value)
+    except (TypeError, ValueError):
+        return "-"
+    if abs(price) >= 1000:
+        return f"{price:,.2f}"
+    if abs(price) >= 1:
+        return f"{price:.2f}"
+    return f"{price:.6f}"
 
 
 def db():

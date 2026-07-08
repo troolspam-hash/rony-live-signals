@@ -67,9 +67,9 @@
         </div>
       </div>
       <div class="price-grid">
-        <div><span>Entrada</span><b>${{ "%.4f"|format(s.entry_price) }}</b></div>
-        <div><span>TP</span><b>${{ "%.4f"|format(s.tp_price) }}</b><small>{{ "%.2f"|format(s.tp_pct) }}%</small></div>
-        <div><span>SL</span><b>${{ "%.4f"|format(s.sl_price) }}</b><small>{{ "%.2f"|format(s.sl_pct) }}%</small></div>
+        <div><span>Entrada</span><b>${{ s.entry_price|price_fmt }}</b></div>
+        <div><span>TP</span><b>${{ s.tp_price|price_fmt }}</b><small>{{ "%.2f"|format(s.tp_pct) }}%</small></div>
+        <div><span>SL</span><b>${{ s.sl_price|price_fmt }}</b><small>{{ "%.2f"|format(s.sl_pct) }}%</small></div>
       </div>
       <div class="range-line">
         <span class="range-segment left"></span>
@@ -79,13 +79,13 @@
       </div>
       <div class="range-labels">
         {% if s.direction == 'short' %}
-          <span class="tp-label">TP ${{ "%.4f"|format(s.tp_price) }}</span>
-          <span>Entrada ${{ "%.4f"|format(s.entry_price) }}</span>
-          <span class="sl-label">SL ${{ "%.4f"|format(s.sl_price) }}</span>
+          <span class="tp-label">TP ${{ s.tp_price|price_fmt }}</span>
+          <span>Entrada ${{ s.entry_price|price_fmt }}</span>
+          <span class="sl-label">SL ${{ s.sl_price|price_fmt }}</span>
         {% else %}
-          <span class="sl-label">SL ${{ "%.4f"|format(s.sl_price) }}</span>
-          <span>Entrada ${{ "%.4f"|format(s.entry_price) }}</span>
-          <span class="tp-label">TP ${{ "%.4f"|format(s.tp_price) }}</span>
+          <span class="sl-label">SL ${{ s.sl_price|price_fmt }}</span>
+          <span>Entrada ${{ s.entry_price|price_fmt }}</span>
+          <span class="tp-label">TP ${{ s.tp_price|price_fmt }}</span>
         {% endif %}
       </div>
       <div class="meta">

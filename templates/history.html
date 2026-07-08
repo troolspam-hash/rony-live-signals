@@ -60,9 +60,9 @@
       <span>{{ t.tf }}</span>
       <b class="{{ t.direction }}">{{ t.direction|upper }}</b>
       <span>{{ t.entry_time|br_time }}</span>
-      <span>${{ "%.4f"|format(t.entry_price) }}</span>
+      <span>${{ t.entry_price|price_fmt }}</span>
       <span>{{ t.exit_time|br_time }}</span>
-      <span>${{ "%.4f"|format(t.exit_price) }}</span>
+      <span>${{ t.exit_price|price_fmt }}</span>
       <b class="{{ t.result }}">{{ t.result|upper if t.result else '-' }}</b>
       <span class="{% if t.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(t.pnl_pct) }}%</span>
     </div>
