@@ -633,6 +633,45 @@ def ingest_trades():
     return jsonify({"ok": True, "received": inserted})
 
 
+@app.post("/api/users/sync")
+def sync_users():
+    token = request.headers.get("X-Ingest-Token", "")
+    expected = os.getenv("INGEST_TOKEN", "")
+    if not expected or not secrets.compare_digest(token, expected):
+        abort(401)
+
+    data = request.get_json(force=True, silent=False)
+    rows = data.get("users") if isinstance(data, dict) else data
+    if not isinstance(rows, list):
+        return jsonify({"ok": False, "error": "expected list or {'users': [...]}"}), 400
+
+    synced = 0
+    with db() as conn:
+        for user in rows:
+            username = str(user.get("username", "")).strip()
+            password = str(user.get("password", ""))
+            role = str(user.get("role", "user")).strip().lower()
+            active = 1 if user.get("active", True) else 0
+            if not username or not password:
+                continue
+            if role not in ("user", "admin"):
+                role = "user"
+            row = conn.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone()
+            password_hash = generate_password_hash(password)
+            if row:
+                conn.execute(
+                    "UPDATE users SET password_hash=?, role=?, active=? WHERE username=?",
+                    (password_hash, role, active, username),
+                )
+            else:
+                conn.execute(
+                    "INSERT INTO users (username, password_hash, role, active, created_at) VALUES (?, ?, ?, ?, ?)",
+                    (username, password_hash, role, active, utc_now()),
+                )
+            synced += 1
+    return jsonify({"ok": True, "synced": synced})
+
+
 @app.get("/api/signals")
 @login_required
 def api_signals():
