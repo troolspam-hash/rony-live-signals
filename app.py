@@ -723,7 +723,7 @@ def admin_users():
             ORDER BY u.id
         """).fetchall()
         ip_stats = {
-            row["user_id"]: row
+            row["user_id"]: dict(row)
             for row in conn.execute("""
                 SELECT
                   user_id,
