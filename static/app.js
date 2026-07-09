@@ -5,6 +5,7 @@
   var signalPollInitialized = false;
   var dashboardVersion = null;
   var historyVersion = null;
+  var isAuthenticated = document.body && document.body.dataset.authenticated === '1';
 
   function collectCards() {
     cards = Array.prototype.slice.call(document.querySelectorAll('.signal-card[data-symbol]'));
@@ -241,6 +242,7 @@
   }
 
   async function checkSession() {
+    if (!isAuthenticated) return;
     try {
       var res = await fetch('/api/session-check', {
         cache: 'no-store',
@@ -266,14 +268,18 @@
 
   update();
   updateMarketSparks();
-  checkNewSignals();
-  refreshDashboardFragments();
-  refreshHistoryFragments();
-  checkSession();
+  if (isAuthenticated) {
+    checkNewSignals();
+    refreshDashboardFragments();
+    refreshHistoryFragments();
+    checkSession();
+  }
   setInterval(update, 4000);
   setInterval(updateMarketSparks, 60000);
-  setInterval(checkNewSignals, 5000);
-  setInterval(refreshDashboardFragments, 7000);
-  setInterval(refreshHistoryFragments, 10000);
-  setInterval(checkSession, 10000);
+  if (isAuthenticated) {
+    setInterval(checkNewSignals, 5000);
+    setInterval(refreshDashboardFragments, 7000);
+    setInterval(refreshHistoryFragments, 10000);
+    setInterval(checkSession, 10000);
+  }
 })();

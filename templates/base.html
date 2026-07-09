@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
 </head>
-<body>
+<body data-authenticated="{% if me %}1{% else %}0{% endif %}">
   <header class="topbar">
     <div>
       <div class="brand">RONY CARVALHO</div>
