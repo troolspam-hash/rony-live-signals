@@ -71,8 +71,8 @@ def pct_fmt(value):
         pct = float(value)
     except (TypeError, ValueError):
         return "--"
-    if abs(pct) < 0.005:
-        pct = 0.0
+    if pct != 0 and abs(pct) < 0.005:
+        pct = 0.01 if pct > 0 else -0.01
     return f"{pct:+.2f}%"
 
 
