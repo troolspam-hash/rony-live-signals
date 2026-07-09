@@ -240,14 +240,40 @@
     }
   }
 
+  async function checkSession() {
+    try {
+      var res = await fetch('/api/session-check', {
+        cache: 'no-store',
+        credentials: 'same-origin',
+        redirect: 'manual'
+      });
+      if (res.status === 401 || res.status === 403 || res.type === 'opaqueredirect' || res.status === 0) {
+        window.location.href = '/login';
+        return;
+      }
+      if (!res.ok) return;
+      var contentType = res.headers.get('content-type') || '';
+      if (contentType.indexOf('application/json') === -1) {
+        window.location.href = '/login';
+        return;
+      }
+      var data = await res.json();
+      if (!data.active) window.location.href = '/login';
+    } catch (err) {
+      console.warn('session check failed', err);
+    }
+  }
+
   update();
   updateMarketSparks();
   checkNewSignals();
   refreshDashboardFragments();
   refreshHistoryFragments();
+  checkSession();
   setInterval(update, 4000);
   setInterval(updateMarketSparks, 60000);
   setInterval(checkNewSignals, 5000);
   setInterval(refreshDashboardFragments, 7000);
   setInterval(refreshHistoryFragments, 10000);
+  setInterval(checkSession, 10000);
 })();

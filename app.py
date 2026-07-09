@@ -837,6 +837,12 @@ def api_open_signals():
     return jsonify([dict(r) for r in rows])
 
 
+@app.get("/api/session-check")
+@login_required
+def session_check():
+    return jsonify({"ok": True, "active": True})
+
+
 @app.get("/alerta/<path:filename>")
 @login_required
 def alert_file(filename):
