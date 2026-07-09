@@ -901,11 +901,14 @@ input:focus, select:focus {
 
 .history-row b {
   width: fit-content;
+  min-width: max-content;
   border: 1px solid rgba(0, 245, 160, .35);
   border-radius: 6px;
   padding: 4px 8px;
   color: var(--green);
   font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .history-row b.short {
@@ -924,7 +927,7 @@ input:focus, select:focus {
 .trade-head,
 .trade-row {
   display: grid;
-  grid-template-columns: 110px 64px 92px minmax(135px, 1fr) minmax(130px, 1fr) minmax(145px, 1fr) minmax(130px, 1fr) 92px 96px;
+  grid-template-columns: 110px 64px 92px minmax(135px, 1fr) minmax(130px, 1fr) minmax(145px, 1fr) minmax(130px, 1fr) 118px 96px;
   gap: 12px;
   align-items: center;
   min-width: 980px;
@@ -966,11 +969,14 @@ input:focus, select:focus {
 
 .trade-row b {
   width: fit-content;
+  min-width: max-content;
   border: 1px solid rgba(0, 245, 160, .35);
   border-radius: 6px;
   padding: 4px 8px;
   color: var(--green);
   font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .trade-row b.short,
