@@ -241,6 +241,54 @@
     }
   }
 
+  async function loadHistoryFragment(url, pushState) {
+    if (!document.querySelector('[data-refresh-block="history"]')) return;
+    var target = new URL(url, window.location.origin);
+    try {
+      var res = await fetch('/api/history-fragments' + target.search, { cache: 'no-store' });
+      if (!res.ok) return;
+      var data = await res.json();
+      var history = document.querySelector('[data-refresh-block="history"]');
+      if (history && data.history_html) history.outerHTML = data.history_html;
+      historyVersion = data.version || null;
+      if (pushState) window.history.pushState({}, '', '/history' + target.search);
+    } catch (err) {
+      console.warn('history page load failed', err);
+    }
+  }
+
+  document.addEventListener('click', function(event) {
+    var link = event.target.closest('[data-refresh-block="history"] .pager a');
+    if (!link || link.classList.contains('disabled')) return;
+    event.preventDefault();
+    loadHistoryFragment(link.href, true);
+  });
+
+  document.addEventListener('submit', function(event) {
+    var form = event.target.closest('.history-board .filters');
+    if (!form) return;
+    event.preventDefault();
+    var params = new URLSearchParams(new FormData(form));
+    params.set('page', '1');
+    loadHistoryFragment('/history?' + params.toString(), true);
+  });
+
+  document.addEventListener('change', function(event) {
+    var select = event.target.closest('[data-refresh-block="history"] .per-page select');
+    if (!select) return;
+    event.preventDefault();
+    var form = select.form;
+    var params = new URLSearchParams(new FormData(form));
+    params.set('page', '1');
+    loadHistoryFragment('/history?' + params.toString(), true);
+  });
+
+  window.addEventListener('popstate', function() {
+    if (document.querySelector('[data-refresh-block="history"]')) {
+      loadHistoryFragment(window.location.href, false);
+    }
+  });
+
   async function checkSession() {
     if (!isAuthenticated) return;
     try {

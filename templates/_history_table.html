@@ -48,7 +48,7 @@
       <input type="hidden" name="asset" value="{{ asset }}">
       <input type="hidden" name="direction" value="{{ direction }}">
       <input type="hidden" name="result" value="{{ result }}">
-      <select name="per_page" onchange="this.form.submit()">
+      <select name="per_page">
         {% for n in [14, 25, 50, 100] %}
         <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }} por pagina</option>
         {% endfor %}
