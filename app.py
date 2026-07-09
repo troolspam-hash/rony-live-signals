@@ -18,6 +18,12 @@ ALERT_DIR = BASE_DIR / "alerta"
 DB_PATH = Path(os.getenv("DATABASE_PATH", BASE_DIR / "data" / "live_signals.db"))
 INITIAL_CAPITAL = float(os.getenv("SITE_INITIAL_CAPITAL", "1000"))
 DISPLAY_TZ = ZoneInfo(os.getenv("DISPLAY_TIMEZONE", "America/Sao_Paulo"))
+COIN_LOGOS = {
+    "BTC": "https://s2.coinmarketcap.com/static/img/coins/64x64/1.png",
+    "ETH": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+    "SOL": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png",
+    "BNB": "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png",
+}
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
@@ -289,6 +295,107 @@ def compute_trade_stats():
     }
 
 
+def load_dashboard_data(asset="all", direction="all"):
+    params = []
+    where = []
+    if asset != "all":
+        where.append("asset=?")
+        params.append(asset)
+    if direction != "all":
+        where.append("direction=?")
+        params.append(direction)
+    sql_where = "WHERE " + " AND ".join(where) if where else ""
+    with db() as conn:
+        open_signals = conn.execute(
+            f"""
+            SELECT * FROM open_signals {sql_where}
+            ORDER BY COALESCE(entry_time, created_at, received_at) DESC, received_at DESC
+            LIMIT 300
+            """,
+            params,
+        ).fetchall()
+        history_signals = conn.execute(
+            f"SELECT * FROM signals {sql_where} ORDER BY received_at DESC LIMIT 300",
+            params,
+        ).fetchall()
+        stats = conn.execute("""
+            SELECT
+              COUNT(*) AS total,
+              SUM(CASE WHEN direction='long' THEN 1 ELSE 0 END) AS longs,
+              SUM(CASE WHEN direction='short' THEN 1 ELSE 0 END) AS shorts
+            FROM open_signals
+        """).fetchone()
+        assets = conn.execute("""
+            SELECT asset FROM (
+                SELECT DISTINCT asset FROM open_signals
+                UNION
+                SELECT DISTINCT asset FROM signals
+            ) ORDER BY asset
+        """).fetchall()
+    return {
+        "open_signals": open_signals,
+        "history_signals": history_signals,
+        "stats": stats,
+        "trade_stats": compute_trade_stats(),
+        "assets": assets,
+        "asset": asset,
+        "direction": direction,
+        "coin_logos": COIN_LOGOS,
+    }
+
+
+def load_history_data(asset="all", direction="all", result="all", page=1, per_page=14):
+    if per_page not in (14, 25, 50, 100):
+        per_page = 14
+    page = max(1, int(page or 1))
+    params = []
+    where = []
+    if asset != "all":
+        where.append("asset=?")
+        params.append(asset)
+    if direction != "all":
+        where.append("direction=?")
+        params.append(direction)
+    if result != "all":
+        where.append("result=?")
+        params.append(result)
+    sql_where = "WHERE " + " AND ".join(where) if where else ""
+    with db() as conn:
+        total = conn.execute(f"SELECT COUNT(*) AS n FROM closed_trades {sql_where}", params).fetchone()["n"]
+        pages = max(1, (total + per_page - 1) // per_page)
+        page = min(page, pages)
+        offset = (page - 1) * per_page
+        trades = conn.execute(
+            f"""
+            SELECT * FROM closed_trades {sql_where}
+            ORDER BY
+              CASE
+                WHEN instr(id, '|') > 0 THEN CAST(substr(id, 1, instr(id, '|') - 1) AS INTEGER)
+                ELSE 0
+              END DESC,
+              exit_time DESC
+            LIMIT ? OFFSET ?
+            """,
+            params + [per_page, offset],
+        ).fetchall()
+        assets = conn.execute("SELECT DISTINCT asset FROM closed_trades ORDER BY asset").fetchall()
+    return {
+        "trades": trades,
+        "trade_stats": compute_trade_stats(),
+        "assets": assets,
+        "asset": asset,
+        "direction": direction,
+        "result": result,
+        "page": page,
+        "per_page": per_page,
+        "pages": pages,
+        "total": total,
+        "start_item": (offset + 1 if total else 0),
+        "end_item": min(offset + per_page, total),
+        "coin_logos": COIN_LOGOS,
+    }
+
+
 def store_signal(conn, data: dict, received_at: str, table: str = "signals", replace: bool = False):
     if table not in ("signals", "open_signals"):
         raise ValueError("invalid signal table")
@@ -357,53 +464,28 @@ def logout():
 def dashboard():
     asset = request.args.get("asset", "all")
     direction = request.args.get("direction", "all")
-    params = []
-    where = []
-    if asset != "all":
-        where.append("asset=?")
-        params.append(asset)
-    if direction != "all":
-        where.append("direction=?")
-        params.append(direction)
-    sql_where = "WHERE " + " AND ".join(where) if where else ""
-    with db() as conn:
-        open_signals = conn.execute(
-            f"""
-            SELECT * FROM open_signals {sql_where}
-            ORDER BY COALESCE(entry_time, created_at, received_at) DESC, received_at DESC
-            LIMIT 300
-            """,
-            params,
-        ).fetchall()
-        history_signals = conn.execute(
-            f"SELECT * FROM signals {sql_where} ORDER BY received_at DESC LIMIT 300",
-            params,
-        ).fetchall()
-        stats = conn.execute("""
-            SELECT
-              COUNT(*) AS total,
-              SUM(CASE WHEN direction='long' THEN 1 ELSE 0 END) AS longs,
-              SUM(CASE WHEN direction='short' THEN 1 ELSE 0 END) AS shorts
-            FROM open_signals
-        """).fetchone()
-        assets = conn.execute("""
-            SELECT asset FROM (
-                SELECT DISTINCT asset FROM open_signals
-                UNION
-                SELECT DISTINCT asset FROM signals
-            ) ORDER BY asset
-        """).fetchall()
-    trade_stats = compute_trade_stats()
-    return render_template(
-        "dashboard.html",
-        open_signals=open_signals,
-        history_signals=history_signals,
-        stats=stats,
-        trade_stats=trade_stats,
-        assets=assets,
-        asset=asset,
-        direction=direction,
+    return render_template("dashboard.html", **load_dashboard_data(asset, direction))
+
+
+@app.get("/api/dashboard-fragments")
+@login_required
+def dashboard_fragments():
+    asset = request.args.get("asset", "all")
+    direction = request.args.get("direction", "all")
+    data = load_dashboard_data(asset, direction)
+    version = "|".join(
+        [
+            str(data["trade_stats"]["total"]),
+            f"{data['trade_stats']['pnl_pct']:.8f}",
+            ",".join(str(row["id"]) for row in data["open_signals"]),
+        ]
     )
+    return jsonify({
+        "version": version,
+        "stats_html": render_template("_dashboard_stats.html", **data),
+        "summary_html": render_template("_dashboard_summary.html", **data),
+        "signals_html": render_template("_signal_list.html", **data),
+    })
 
 
 @app.get("/history")
@@ -420,55 +502,35 @@ def history():
         per_page = int(request.args.get("per_page", "14"))
     except ValueError:
         per_page = 14
-    if per_page not in (14, 25, 50, 100):
+    return render_template("history.html", **load_history_data(asset, direction, result, page, per_page))
+
+
+@app.get("/api/history-fragments")
+@login_required
+def history_fragments():
+    asset = request.args.get("asset", "all")
+    direction = request.args.get("direction", "all")
+    result = request.args.get("result", "all")
+    try:
+        page = max(1, int(request.args.get("page", "1")))
+    except ValueError:
+        page = 1
+    try:
+        per_page = int(request.args.get("per_page", "14"))
+    except ValueError:
         per_page = 14
-    params = []
-    where = []
-    if asset != "all":
-        where.append("asset=?")
-        params.append(asset)
-    if direction != "all":
-        where.append("direction=?")
-        params.append(direction)
-    if result != "all":
-        where.append("result=?")
-        params.append(result)
-    sql_where = "WHERE " + " AND ".join(where) if where else ""
-    with db() as conn:
-        total = conn.execute(f"SELECT COUNT(*) AS n FROM closed_trades {sql_where}", params).fetchone()["n"]
-        pages = max(1, (total + per_page - 1) // per_page)
-        page = min(page, pages)
-        offset = (page - 1) * per_page
-        trades = conn.execute(
-            f"""
-            SELECT * FROM closed_trades {sql_where}
-            ORDER BY
-              CASE
-                WHEN instr(id, '|') > 0 THEN CAST(substr(id, 1, instr(id, '|') - 1) AS INTEGER)
-                ELSE 0
-              END DESC,
-              exit_time DESC
-            LIMIT ? OFFSET ?
-            """,
-            params + [per_page, offset],
-        ).fetchall()
-        assets = conn.execute("SELECT DISTINCT asset FROM closed_trades ORDER BY asset").fetchall()
-    trade_stats = compute_trade_stats()
-    return render_template(
-        "history.html",
-        trades=trades,
-        trade_stats=trade_stats,
-        assets=assets,
-        asset=asset,
-        direction=direction,
-        result=result,
-        page=page,
-        per_page=per_page,
-        pages=pages,
-        total=total,
-        start_item=(offset + 1 if total else 0),
-        end_item=min(offset + per_page, total),
+    data = load_history_data(asset, direction, result, page, per_page)
+    version = "|".join(
+        [
+            str(data["total"]),
+            str(data["page"]),
+            ",".join(str(row["id"]) for row in data["trades"]),
+        ]
     )
+    return jsonify({
+        "version": version,
+        "history_html": render_template("_history_table.html", **data),
+    })
 
 
 @app.route("/admin/users", methods=["GET", "POST"])

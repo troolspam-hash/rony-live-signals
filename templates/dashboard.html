@@ -1,11 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-{% set coin_logos = {
-  'BTC': 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png',
-  'ETH': 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-  'SOL': 'https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png',
-  'BNB': 'https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png'
-} %}
 <section class="market-strip">
   {% for coin in [('BTCUSDT','BTC'), ('ETHUSDT','ETH'), ('SOLUSDT','SOL'), ('BNBUSDT','BNB')] %}
   <div class="market-pill coin-{{ coin[1]|lower }}" data-ticker="{{ coin[0] }}">
@@ -28,89 +22,8 @@
   {% endfor %}
 </section>
 
-<section class="stats-grid">
-  <div class="stat">
-    <span class="stat-icon"><img src="https://cdn-icons-png.magnific.com/512/18/18383.png" alt="Trades"></span>
-    <div>
-      <span>Trades</span>
-      <strong>{{ trade_stats.total }}</strong>
-      <small>fechados no historico</small>
-    </div>
-  </div>
-  <div class="stat">
-    <span class="stat-icon"><img src="https://cdn-icons-png.flaticon.com/512/934/934640.png" alt="Win Rate"></span>
-    <div>
-      <span>Win Rate</span>
-      <strong>{% if trade_stats.wr is not none %}{{ "%.1f"|format(trade_stats.wr) }}%{% else %}--{% endif %}</strong>
-      <small>{{ trade_stats.wins }}/{{ trade_stats.losses }} green / loss</small>
-    </div>
-  </div>
-  <div class="stat">
-    <span class="stat-icon"><img src="https://static.vecteezy.com/system/resources/previews/014/455/897/non_2x/money-icon-on-transparent-background-free-png.png" alt="PnL"></span>
-    <div>
-      <span>PnL %</span>
-      <strong class="{% if trade_stats.pnl_pct >= 0 %}up{% else %}down{% endif %}">
-        {{ "%+.2f"|format(trade_stats.pnl_pct) }}%
-      </strong>
-      <small>acumulado finalizado</small>
-    </div>
-  </div>
-</section>
-
-<section class="summary-panel">
-  <div class="summary-row asset-summary">
-    {% for item in trade_stats.by_asset %}
-      <div class="summary-cell {% if item.pnl_pct >= 0 %}good{% else %}bad{% endif %}">
-        <span>{{ item.asset }}</span>
-        <div>
-          <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
-          <small>{{ item.count }} trades</small>
-        </div>
-        <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
-          <line x1="0" y1="9" x2="120" y2="9"></line>
-          <line x1="0" y1="18" x2="120" y2="18"></line>
-          <line x1="0" y1="27" x2="120" y2="27"></line>
-          <path class="spark-area" d="{{ item.spark_area }}"></path>
-          <path class="spark-path" d="{{ item.spark_path }}"></path>
-        </svg>
-      </div>
-    {% endfor %}
-  </div>
-  <div class="summary-row direction-summary">
-    <div class="summary-cell direction-card {% if trade_stats.by_direction['long'].pnl_pct >= 0 %}good{% else %}bad{% endif %}">
-      <span>LONG</span>
-      <div>
-        <b class="{% if trade_stats.by_direction['long'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
-          {{ "%+.2f"|format(trade_stats.by_direction['long'].pnl_pct) }}%
-        </b>
-        <small>{{ trade_stats.by_direction['long'].count }} trades</small>
-      </div>
-      <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
-        <line x1="0" y1="9" x2="120" y2="9"></line>
-        <line x1="0" y1="18" x2="120" y2="18"></line>
-        <line x1="0" y1="27" x2="120" y2="27"></line>
-        <path class="spark-area" d="{{ trade_stats.by_direction['long'].spark_area }}"></path>
-        <path class="spark-path" d="{{ trade_stats.by_direction['long'].spark_path }}"></path>
-      </svg>
-    </div>
-    <div class="summary-cell direction-card {% if trade_stats.by_direction['short'].pnl_pct >= 0 %}good{% else %}bad{% endif %}">
-      <span>SHORT</span>
-      <div>
-        <b class="{% if trade_stats.by_direction['short'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
-          {{ "%+.2f"|format(trade_stats.by_direction['short'].pnl_pct) }}%
-        </b>
-        <small>{{ trade_stats.by_direction['short'].count }} trades</small>
-      </div>
-      <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
-        <line x1="0" y1="9" x2="120" y2="9"></line>
-        <line x1="0" y1="18" x2="120" y2="18"></line>
-        <line x1="0" y1="27" x2="120" y2="27"></line>
-        <path class="spark-area" d="{{ trade_stats.by_direction['short'].spark_area }}"></path>
-        <path class="spark-path" d="{{ trade_stats.by_direction['short'].spark_path }}"></path>
-      </svg>
-    </div>
-  </div>
-</section>
+{% include "_dashboard_stats.html" %}
+{% include "_dashboard_summary.html" %}
 
 <section class="panel">
   <div class="panel-head">
@@ -131,52 +44,7 @@
     </form>
   </div>
 
-  <div class="signal-list" id="signalsList">
-    {% for s in open_signals %}
-    <article
-      class="signal-card {{ s.direction }} {{ s.status or 'open' }}"
-      data-signal-id="{{ s.id }}"
-      data-symbol="{{ s.asset }}"
-      data-direction="{{ s.direction }}"
-      data-entry="{{ s.entry_price }}"
-      data-tp="{{ s.tp_price }}"
-      data-sl="{{ s.sl_price }}"
-    >
-      <div class="signal-top">
-        <div class="signal-identity">
-          {% set ticker = s.asset.replace('USDT', '') %}
-          <span class="coin-badge small"><img src="{{ coin_logos.get(ticker, '') }}" alt="{{ ticker }}"></span>
-          <strong>{{ ticker }}</strong>
-          <span>{{ s.tf }}</span>
-          <b>{{ s.direction|upper }}</b>
-          <span class="entry-inline">
-            {% if s.status == 'pending' %}Prevista{% else %}Entrada{% endif %} {{ (s.entry_time or s.created_at)|br_time }} <i></i> ${{ s.entry_price|price_fmt }}
-            <em class="line-sep"></em>
-            Take Profit <strong>${{ s.tp_price|price_fmt }}</strong> <small class="tp-pct">{{ "%.2f"|format(s.tp_pct) }}%</small>
-            <em class="line-sep"></em>
-            Stop Loss <strong>${{ s.sl_price|price_fmt }}</strong> <small class="sl-pct">{{ "%.2f"|format(s.sl_pct) }}%</small>
-          </span>
-          {% if s.status == 'pending' %}
-          <em>Aguardando entrada</em>
-          {% endif %}
-        </div>
-        <div class="live-box">
-          <span>Ao vivo</span>
-          <strong class="live-pnl">--</strong>
-          <small class="live-price">preco --</small>
-        </div>
-      </div>
-      <div class="range-line">
-        <span class="range-segment left"></span>
-        <span class="range-segment right"></span>
-        <span class="range-center"></span>
-        <span class="range-thumb"></span>
-      </div>
-    </article>
-    {% else %}
-    <div class="empty">Nenhum sinal aberto no momento.</div>
-    {% endfor %}
-  </div>
+  {% include "_signal_list.html" %}
 </section>
 
 <audio id="signalAlertAudio" preload="auto" src="{{ url_for('alert_file', filename='universfield-new-notification-023-494260.mp3') }}"></audio>

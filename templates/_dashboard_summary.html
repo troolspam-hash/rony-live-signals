@@ -1,0 +1,54 @@
+<section class="summary-panel" data-refresh-block="summary">
+  <div class="summary-row asset-summary">
+    {% for item in trade_stats.by_asset %}
+      <div class="summary-cell {% if item.pnl_pct >= 0 %}good{% else %}bad{% endif %}">
+        <span>{{ item.asset }}</span>
+        <div>
+          <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
+          <small>{{ item.count }} trades</small>
+        </div>
+        <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
+          <line x1="0" y1="9" x2="120" y2="9"></line>
+          <line x1="0" y1="18" x2="120" y2="18"></line>
+          <line x1="0" y1="27" x2="120" y2="27"></line>
+          <path class="spark-area" d="{{ item.spark_area }}"></path>
+          <path class="spark-path" d="{{ item.spark_path }}"></path>
+        </svg>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="summary-row direction-summary">
+    <div class="summary-cell direction-card {% if trade_stats.by_direction['long'].pnl_pct >= 0 %}good{% else %}bad{% endif %}">
+      <span>LONG</span>
+      <div>
+        <b class="{% if trade_stats.by_direction['long'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
+          {{ "%+.2f"|format(trade_stats.by_direction['long'].pnl_pct) }}%
+        </b>
+        <small>{{ trade_stats.by_direction['long'].count }} trades</small>
+      </div>
+      <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
+        <line x1="0" y1="9" x2="120" y2="9"></line>
+        <line x1="0" y1="18" x2="120" y2="18"></line>
+        <line x1="0" y1="27" x2="120" y2="27"></line>
+        <path class="spark-area" d="{{ trade_stats.by_direction['long'].spark_area }}"></path>
+        <path class="spark-path" d="{{ trade_stats.by_direction['long'].spark_path }}"></path>
+      </svg>
+    </div>
+    <div class="summary-cell direction-card {% if trade_stats.by_direction['short'].pnl_pct >= 0 %}good{% else %}bad{% endif %}">
+      <span>SHORT</span>
+      <div>
+        <b class="{% if trade_stats.by_direction['short'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
+          {{ "%+.2f"|format(trade_stats.by_direction['short'].pnl_pct) }}%
+        </b>
+        <small>{{ trade_stats.by_direction['short'].count }} trades</small>
+      </div>
+      <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
+        <line x1="0" y1="9" x2="120" y2="9"></line>
+        <line x1="0" y1="18" x2="120" y2="18"></line>
+        <line x1="0" y1="27" x2="120" y2="27"></line>
+        <path class="spark-area" d="{{ trade_stats.by_direction['short'].spark_area }}"></path>
+        <path class="spark-path" d="{{ trade_stats.by_direction['short'].spark_path }}"></path>
+      </svg>
+    </div>
+  </div>
+</section>

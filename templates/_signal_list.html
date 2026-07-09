@@ -1,0 +1,46 @@
+<div class="signal-list" id="signalsList" data-refresh-block="signals">
+  {% for s in open_signals %}
+  <article
+    class="signal-card {{ s.direction }} {{ s.status or 'open' }}"
+    data-signal-id="{{ s.id }}"
+    data-symbol="{{ s.asset }}"
+    data-direction="{{ s.direction }}"
+    data-entry="{{ s.entry_price }}"
+    data-tp="{{ s.tp_price }}"
+    data-sl="{{ s.sl_price }}"
+  >
+    <div class="signal-top">
+      <div class="signal-identity">
+        {% set ticker = s.asset.replace('USDT', '') %}
+        <span class="coin-badge small"><img src="{{ coin_logos.get(ticker, '') }}" alt="{{ ticker }}"></span>
+        <strong>{{ ticker }}</strong>
+        <span>{{ s.tf }}</span>
+        <b>{{ s.direction|upper }}</b>
+        <span class="entry-inline">
+          {% if s.status == 'pending' %}Prevista{% else %}Entrada{% endif %} {{ (s.entry_time or s.created_at)|br_time }} <i></i> ${{ s.entry_price|price_fmt }}
+          <em class="line-sep"></em>
+          Take Profit <strong>${{ s.tp_price|price_fmt }}</strong> <small class="tp-pct">{{ "%.2f"|format(s.tp_pct) }}%</small>
+          <em class="line-sep"></em>
+          Stop Loss <strong>${{ s.sl_price|price_fmt }}</strong> <small class="sl-pct">{{ "%.2f"|format(s.sl_pct) }}%</small>
+        </span>
+        {% if s.status == 'pending' %}
+        <em>Aguardando entrada</em>
+        {% endif %}
+      </div>
+      <div class="live-box">
+        <span>Ao vivo</span>
+        <strong class="live-pnl">--</strong>
+        <small class="live-price">preco --</small>
+      </div>
+    </div>
+    <div class="range-line">
+      <span class="range-segment left"></span>
+      <span class="range-segment right"></span>
+      <span class="range-center"></span>
+      <span class="range-thumb"></span>
+    </div>
+  </article>
+  {% else %}
+  <div class="empty">Nenhum sinal aberto no momento.</div>
+  {% endfor %}
+</div>

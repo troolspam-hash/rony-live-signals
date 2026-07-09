@@ -1,9 +1,16 @@
 (function() {
-  var cards = Array.prototype.slice.call(document.querySelectorAll('.signal-card[data-symbol]'));
+  var cards = [];
   var knownSignalIds = {};
   var signalAlertReady = false;
   var signalPollInitialized = false;
+  var dashboardVersion = null;
+  var historyVersion = null;
 
+  function collectCards() {
+    cards = Array.prototype.slice.call(document.querySelectorAll('.signal-card[data-symbol]'));
+  }
+
+  collectCards();
   cards.forEach(function(card) {
     if (card.dataset.signalId) knownSignalIds[card.dataset.signalId] = true;
   });
@@ -84,6 +91,7 @@
 
   function symbols() {
     var set = {};
+    collectCards();
     cards.forEach(function(card) { set[card.dataset.symbol] = true; });
     document.querySelectorAll('[data-ticker]').forEach(function(el) { set[el.dataset.ticker] = true; });
     return Object.keys(set);
@@ -117,6 +125,7 @@
 
   async function update() {
     try {
+      collectCards();
       var list = symbols();
       var prices = {};
       await Promise.all(list.map(async function(symbol) {
@@ -187,10 +196,58 @@
     }
   }
 
+  function currentDashboardQuery() {
+    var params = new URLSearchParams(window.location.search || '');
+    return '?asset=' + encodeURIComponent(params.get('asset') || 'all') +
+      '&direction=' + encodeURIComponent(params.get('direction') || 'all');
+  }
+
+  async function refreshDashboardFragments() {
+    if (!document.querySelector('[data-refresh-block="signals"]')) return;
+    try {
+      var res = await fetch('/api/dashboard-fragments' + currentDashboardQuery(), { cache: 'no-store' });
+      if (!res.ok) return;
+      var data = await res.json();
+      if (!data || data.version === dashboardVersion) return;
+      dashboardVersion = data.version;
+
+      var stats = document.querySelector('[data-refresh-block="stats"]');
+      var summary = document.querySelector('[data-refresh-block="summary"]');
+      var signals = document.querySelector('[data-refresh-block="signals"]');
+      if (stats && data.stats_html) stats.outerHTML = data.stats_html;
+      if (summary && data.summary_html) summary.outerHTML = data.summary_html;
+      if (signals && data.signals_html) signals.outerHTML = data.signals_html;
+
+      collectCards();
+      update();
+    } catch (err) {
+      console.warn('dashboard refresh failed', err);
+    }
+  }
+
+  async function refreshHistoryFragments() {
+    if (!document.querySelector('[data-refresh-block="history"]')) return;
+    try {
+      var res = await fetch('/api/history-fragments' + (window.location.search || ''), { cache: 'no-store' });
+      if (!res.ok) return;
+      var data = await res.json();
+      if (!data || data.version === historyVersion) return;
+      historyVersion = data.version;
+      var history = document.querySelector('[data-refresh-block="history"]');
+      if (history && data.history_html) history.outerHTML = data.history_html;
+    } catch (err) {
+      console.warn('history refresh failed', err);
+    }
+  }
+
   update();
   updateMarketSparks();
   checkNewSignals();
+  refreshDashboardFragments();
+  refreshHistoryFragments();
   setInterval(update, 4000);
   setInterval(updateMarketSparks, 60000);
   setInterval(checkNewSignals, 5000);
+  setInterval(refreshDashboardFragments, 7000);
+  setInterval(refreshHistoryFragments, 10000);
 })();
