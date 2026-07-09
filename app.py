@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from functools import wraps
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -143,6 +143,37 @@ def init_db():
         """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_closed_trades_exit ON closed_trades(exit_time DESC)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_closed_trades_asset ON closed_trades(asset, tf, direction)")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT UNIQUE NOT NULL,
+                user_id INTEGER NOT NULL,
+                login_at TEXT NOT NULL,
+                last_seen_at TEXT NOT NULL,
+                logout_at TEXT,
+                last_path TEXT,
+                ip TEXT,
+                user_agent TEXT,
+                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_user_sessions_user ON user_sessions(user_id, last_seen_at DESC)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_user_sessions_active ON user_sessions(logout_at, last_seen_at DESC)")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_ip_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                session_id TEXT,
+                ip TEXT NOT NULL,
+                event TEXT NOT NULL,
+                path TEXT,
+                user_agent TEXT,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_user_ip_logs_user ON user_ip_logs(user_id, created_at DESC)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_user_ip_logs_ip ON user_ip_logs(ip, created_at DESC)")
 
     admin_user = os.getenv("ADMIN_USERNAME", "admin")
     admin_password = os.getenv("ADMIN_PASSWORD")
@@ -171,6 +202,43 @@ def current_user():
         ).fetchone()
 
 
+def parse_utc(value):
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except ValueError:
+        return None
+
+
+def client_ip():
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.remote_addr or ""
+
+
+def log_user_ip(conn, user_id, session_id, event, path=None):
+    conn.execute(
+        """
+        INSERT INTO user_ip_logs (user_id, session_id, ip, event, path, user_agent, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            user_id,
+            session_id,
+            client_ip(),
+            event,
+            path or request.path,
+            request.headers.get("User-Agent", "")[:300],
+            utc_now(),
+        ),
+    )
+
+
 def login_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
@@ -190,6 +258,54 @@ def admin_required(fn):
             abort(403)
         return fn(*args, **kwargs)
     return wrapper
+
+
+@app.before_request
+def track_logged_user():
+    uid = session.get("user_id")
+    sid = session.get("session_id")
+    if not uid or not sid:
+        return
+    if request.endpoint in ("static", "alert_file"):
+        return
+    now = utc_now()
+    try:
+        with db() as conn:
+            active = conn.execute(
+                """
+                SELECT id, ip FROM user_sessions
+                WHERE session_id=? AND user_id=? AND logout_at IS NULL
+                """,
+                (sid, uid),
+            ).fetchone()
+            if not active:
+                session.clear()
+                if request.endpoint not in ("login", "logout"):
+                    flash("Sua sessao foi encerrada por novo login em outro navegador.", "error")
+                    return redirect(url_for("login"))
+                return
+
+            ip = client_ip()
+            if ip and ip != (active["ip"] or ""):
+                log_user_ip(conn, uid, sid, "ip_change", request.path)
+
+            conn.execute(
+                """
+                UPDATE user_sessions
+                SET last_seen_at=?, last_path=?, ip=?, user_agent=?
+                WHERE session_id=? AND user_id=? AND logout_at IS NULL
+                """,
+                (
+                    now,
+                    request.path,
+                    ip,
+                    request.headers.get("User-Agent", "")[:300],
+                    sid,
+                    uid,
+                ),
+            )
+    except sqlite3.Error:
+        return
 
 
 def compute_trade_stats():
@@ -448,6 +564,34 @@ def login():
         if user and check_password_hash(user["password_hash"], password):
             session.clear()
             session["user_id"] = user["id"]
+            session["session_id"] = secrets.token_urlsafe(24)
+            now = utc_now()
+            with db() as conn:
+                conn.execute(
+                    """
+                    UPDATE user_sessions
+                    SET logout_at=?, last_seen_at=?
+                    WHERE user_id=? AND logout_at IS NULL
+                    """,
+                    (now, now, user["id"]),
+                )
+                conn.execute(
+                    """
+                    INSERT INTO user_sessions (
+                      session_id, user_id, login_at, last_seen_at, last_path, ip, user_agent
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        session["session_id"],
+                        user["id"],
+                        now,
+                        now,
+                        request.path,
+                        client_ip(),
+                        request.headers.get("User-Agent", "")[:300],
+                    ),
+                )
+                log_user_ip(conn, user["id"], session["session_id"], "login", request.path)
             return redirect(request.args.get("next") or url_for("dashboard"))
         flash("Usuario ou senha invalidos", "error")
     return render_template("login.html")
@@ -455,6 +599,15 @@ def login():
 
 @app.post("/logout")
 def logout():
+    sid = session.get("session_id")
+    uid = session.get("user_id")
+    if sid and uid:
+        with db() as conn:
+            conn.execute(
+                "UPDATE user_sessions SET logout_at=?, last_seen_at=? WHERE session_id=? AND user_id=?",
+                (utc_now(), utc_now(), sid, uid),
+            )
+            log_user_ip(conn, uid, sid, "logout", request.path)
     session.clear()
     return redirect(url_for("login"))
 
@@ -555,8 +708,50 @@ def admin_users():
             except sqlite3.IntegrityError:
                 flash("Usuario ja existe", "error")
     with db() as conn:
-        users = conn.execute("SELECT id, username, role, active, created_at FROM users ORDER BY id").fetchall()
-    return render_template("admin_users.html", users=users)
+        users = conn.execute("""
+            SELECT
+              u.id, u.username, u.role, u.active, u.created_at,
+              s.session_id, s.login_at, s.last_seen_at, s.logout_at, s.last_path, s.ip
+            FROM users u
+            LEFT JOIN user_sessions s ON s.id = (
+              SELECT id
+              FROM user_sessions
+              WHERE user_id = u.id
+              ORDER BY last_seen_at DESC, id DESC
+              LIMIT 1
+            )
+            ORDER BY u.id
+        """).fetchall()
+        ip_stats = {
+            row["user_id"]: row
+            for row in conn.execute("""
+                SELECT
+                  user_id,
+                  COUNT(DISTINCT ip) AS ip_count,
+                  MAX(created_at) AS last_ip_at
+                FROM user_ip_logs
+                GROUP BY user_id
+            """).fetchall()
+        }
+        ip_logs = conn.execute("""
+            SELECT l.created_at, l.ip, l.event, l.path, u.username
+            FROM user_ip_logs l
+            JOIN users u ON u.id = l.user_id
+            ORDER BY l.created_at DESC, l.id DESC
+            LIMIT 80
+        """).fetchall()
+    now = datetime.now(timezone.utc)
+    user_rows = []
+    for row in users:
+        item = dict(row)
+        last_seen = parse_utc(item.get("last_seen_at"))
+        logout_at = parse_utc(item.get("logout_at"))
+        item["is_online"] = bool(last_seen and not logout_at and now - last_seen <= timedelta(minutes=5))
+        item["session_state"] = "Online" if item["is_online"] else ("Saiu" if logout_at else "Inativo")
+        item["ip_count"] = (ip_stats.get(item["id"]) or {}).get("ip_count", 0)
+        item["last_ip_at"] = (ip_stats.get(item["id"]) or {}).get("last_ip_at")
+        user_rows.append(item)
+    return render_template("admin_users.html", users=user_rows, ip_logs=ip_logs)
 
 
 @app.post("/admin/users/<int:user_id>/toggle")

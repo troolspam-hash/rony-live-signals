@@ -22,6 +22,12 @@
         <th>Usuario</th>
         <th>Role</th>
         <th>Status</th>
+        <th>Sessao</th>
+        <th>Login</th>
+        <th>Ultima atividade</th>
+        <th>Saida</th>
+        <th>IP</th>
+        <th>Redes</th>
         <th>Criado</th>
         <th></th>
       </tr>
@@ -33,7 +39,13 @@
         <td>{{ u.username }}</td>
         <td>{{ u.role }}</td>
         <td>{{ "ativo" if u.active else "inativo" }}</td>
-        <td>{{ u.created_at }}</td>
+        <td><span class="session-badge {{ 'online' if u.is_online else 'offline' }}">{{ u.session_state }}</span></td>
+        <td>{{ u.login_at|br_time if u.login_at else "-" }}</td>
+        <td>{{ u.last_seen_at|br_time if u.last_seen_at else "-" }}</td>
+        <td>{{ u.logout_at|br_time if u.logout_at else "-" }}</td>
+        <td>{{ u.ip or "-" }}</td>
+        <td>{{ u.ip_count }}</td>
+        <td>{{ u.created_at|br_time }}</td>
         <td class="actions">
           <form method="post" action="{{ url_for('toggle_user', user_id=u.id) }}">
             <button type="submit">{{ "Desativar" if u.active else "Ativar" }}</button>
@@ -42,6 +54,39 @@
             <button class="danger" type="submit">Remover</button>
           </form>
         </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel admin-panel">
+  <div class="panel-head">
+    <h1>Logs de IP</h1>
+  </div>
+
+  <table class="users-table ip-log-table">
+    <thead>
+      <tr>
+        <th>Horario</th>
+        <th>Usuario</th>
+        <th>Evento</th>
+        <th>IP</th>
+        <th>Rota</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in ip_logs %}
+      <tr>
+        <td>{{ log.created_at|br_time }}</td>
+        <td>{{ log.username }}</td>
+        <td><span class="session-badge event-{{ log.event }}">{{ log.event }}</span></td>
+        <td>{{ log.ip }}</td>
+        <td>{{ log.path or "-" }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5">Nenhum log de IP ainda.</td>
       </tr>
       {% endfor %}
     </tbody>

@@ -1070,6 +1070,11 @@ input:focus, select:focus {
 .users-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 1060px;
+}
+
+.admin-panel {
+  overflow-x: auto;
 }
 
 .users-table th,
@@ -1089,6 +1094,50 @@ input:focus, select:focus {
 .actions {
   display: flex;
   gap: 8px;
+}
+
+.session-badge {
+  display: inline-flex;
+  align-items: center;
+  min-width: 68px;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, .28);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  background: rgba(15, 23, 42, .55);
+}
+
+.session-badge.online {
+  color: var(--green);
+  border-color: rgba(0, 245, 160, .38);
+  background: rgba(0, 245, 160, .08);
+}
+
+.session-badge.offline {
+  color: var(--muted);
+}
+
+.session-badge.event-login {
+  color: var(--green);
+  border-color: rgba(0, 245, 160, .36);
+}
+
+.session-badge.event-logout {
+  color: var(--muted);
+}
+
+.session-badge.event-ip_change {
+  color: var(--red);
+  border-color: rgba(255, 57, 106, .38);
+  background: rgba(255, 57, 106, .08);
+}
+
+.ip-log-table {
+  margin-top: 0;
 }
 
 .user-form {
