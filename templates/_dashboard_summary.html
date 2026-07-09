@@ -4,7 +4,7 @@
       <div class="summary-cell {% if item.pnl_pct >= 0 %}good{% else %}bad{% endif %}">
         <span>{{ item.asset }}</span>
         <div>
-          <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(item.pnl_pct) }}%</b>
+          <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ item.pnl_pct|pct_fmt }}</b>
           <small>{{ item.count }} trades</small>
         </div>
         <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
@@ -22,7 +22,7 @@
       <span>LONG</span>
       <div>
         <b class="{% if trade_stats.by_direction['long'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
-          {{ "%+.2f"|format(trade_stats.by_direction['long'].pnl_pct) }}%
+          {{ trade_stats.by_direction['long'].pnl_pct|pct_fmt }}
         </b>
         <small>{{ trade_stats.by_direction['long'].count }} trades</small>
       </div>
@@ -38,7 +38,7 @@
       <span>SHORT</span>
       <div>
         <b class="{% if trade_stats.by_direction['short'].pnl_pct >= 0 %}up{% else %}down{% endif %}">
-          {{ "%+.2f"|format(trade_stats.by_direction['short'].pnl_pct) }}%
+          {{ trade_stats.by_direction['short'].pnl_pct|pct_fmt }}
         </b>
         <small>{{ trade_stats.by_direction['short'].count }} trades</small>
       </div>

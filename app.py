@@ -65,6 +65,17 @@ def price_fmt(value):
     return f"{price:.6f}"
 
 
+@app.template_filter("pct_fmt")
+def pct_fmt(value):
+    try:
+        pct = float(value)
+    except (TypeError, ValueError):
+        return "--"
+    if abs(pct) < 0.005:
+        pct = 0.0
+    return f"{pct:+.2f}%"
+
+
 def db():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)

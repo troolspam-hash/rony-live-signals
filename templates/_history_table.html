@@ -24,7 +24,7 @@
       <b class="{{ t.result }}">
         {% if t.result == 'tp' %}Take Profit{% elif t.result == 'sl' %}Stop Loss{% else %}-{% endif %}
       </b>
-      <span class="{% if t.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ "%+.2f"|format(t.pnl_pct) }}%</span>
+      <span class="{% if t.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ t.pnl_pct|pct_fmt }}</span>
     </div>
     {% else %}
     <div class="empty">Nenhum trade fechado recebido ainda.</div>
