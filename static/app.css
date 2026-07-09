@@ -447,7 +447,7 @@ input:focus, select:focus {
   margin-top: 7px;
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1.2;
 }
 
@@ -479,6 +479,10 @@ input:focus, select:focus {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.asset-summary .summary-cell {
+  grid-template-columns: 70px minmax(0, 1fr);
+}
+
 .summary-cell {
   display: grid;
   grid-template-columns: 76px minmax(150px, 1fr) 42%;
@@ -499,7 +503,7 @@ input:focus, select:focus {
 
 .summary-cell span {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -519,7 +523,7 @@ input:focus, select:focus {
 
 .summary-cell small {
   color: var(--dim);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1;
   white-space: nowrap;
 }

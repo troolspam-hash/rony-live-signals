@@ -7,13 +7,6 @@
           <b class="{% if item.pnl_pct >= 0 %}up{% else %}down{% endif %}">{{ item.pnl_pct|pct_fmt }}</b>
           <small>{{ item.count }} trades</small>
         </div>
-        <svg class="mini-spark" viewBox="0 0 120 36" aria-hidden="true">
-          <line x1="0" y1="9" x2="120" y2="9"></line>
-          <line x1="0" y1="18" x2="120" y2="18"></line>
-          <line x1="0" y1="27" x2="120" y2="27"></line>
-          <path class="spark-area" d="{{ item.spark_area }}"></path>
-          <path class="spark-path" d="{{ item.spark_path }}"></path>
-        </svg>
       </div>
     {% endfor %}
   </div>
